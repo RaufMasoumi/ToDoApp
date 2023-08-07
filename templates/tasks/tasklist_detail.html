@@ -1,0 +1,26 @@
+{% extends '_base.html' %}
+{% block content %}
+<h1>{{ tasklist.title }}</h1>
+<hr>
+{% for task in tasklist.tasks.all %}
+<p>
+    <h3>{{ task.title }}</h3>
+    <h4>due date: {{ task.due_date }}</h4>
+    {% if task.is_important %}
+        <h4 style="color: red">Important</h4>
+    {% endif %}
+    {% if task.is_not_important %}
+        <h4 style="color: blueviolet">Not important</h4>
+    {% endif %}
+    {% if task.is_done %}
+        <h4>Done!</h4>
+        <h5>at {{ task.done_at }}</h5>
+    {% else %}
+        <h4>Not Done!</h4>
+    {% endif %}
+    <h4>Since: {{ task.created_at }}</h4>
+    <h4>Updated at: {{ task.updated_at }}</h4>
+</p>
+<hr>
+{% endfor %}
+{% endblock %}
