@@ -9,6 +9,11 @@ class UserProfile(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = get_user_model()
     template_name = 'accounts/user_detail.html'
 
+    def get_object(self, queryset=None):
+        if not self.kwargs.get('slug'):
+            return self.request.user
+        return super().get_object(queryset)
+
     def test_func(self):
         obj = self.get_object()
         return obj == self.request.user

@@ -5,10 +5,18 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.forms import ValidationError
+from django.utils.text import slugify
+import uuid
 # Create your models here.
 
 
+class TaskListManager(models.Manager):
+    def user_tasklist(self, user):
+        return self.filter(user=user)
+
+
 class Task(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False, unique=True)
     user = models.ForeignKey(get_user_model(), related_name='tasks', on_delete=models.CASCADE)
     title = models.CharField(max_length=300)
     due_date = models.DateTimeField(blank=True, null=True)
@@ -43,12 +51,14 @@ class Task(models.Model):
 
 
 class TaskList(models.Model):
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False, unique=True)
     user = models.ForeignKey(get_user_model(), related_name='tasklists', on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, blank=True)
     tasks = models.ManyToManyField(Task, related_name='lists', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    objects = TaskListManager()
 
     def __str__(self):
         return self.title
@@ -65,7 +75,7 @@ class TaskList(models.Model):
         self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
         if not self.slug:
-            self.slug = self.title.lower()
+            self.slug = slugify(self.title)
         return super().save(force_insert, force_update, using, update_fields)
 
 

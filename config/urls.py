@@ -21,14 +21,14 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('accounts/', include('accounts.urls')),
-    path('tasks/', include('tasks.urls')),
+    path('', include('tasks.urls')),
 ]
 
 api_urlpatterns = [
     path('api/accounts/', include('rest_framework.urls')),
     path('api/accounts/rest-auth/', include('dj_rest_auth.urls')),
     path('api/accounts/', include('accounts.api_urls')),
-    path('api/tasks/', include('tasks.api_urls')),
+    path('api/', include('tasks.api_urls')),
 
 ]
 

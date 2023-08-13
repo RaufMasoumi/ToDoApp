@@ -22,5 +22,12 @@
         </library>
       </libraries>
     </data-source>
+    <data-source source="LOCAL" name="ToDoApp" uuid="b278101b-1228-4711-a663-ccae7bc9bcf5">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://localhost:5433/ToDoApp</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

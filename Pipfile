@@ -12,6 +12,7 @@ django-allauth = "*"
 dj-rest-auth = "*"
 django-crispy-forms = "*"
 crispy-bootstrap4 = "*"
+psycopg2 = "*"
 
 [dev-packages]
 
