@@ -3,7 +3,7 @@
 
 {% block content %}
 
-<h1>Delete {{ tasklist.title }}</h1>
+<h1>Delete <a href="{{ tasklist.get_absolute_url }}">{{ tasklist.title }}</a></h1>
 <h2>Are you sure you want to delete the {{ tasklist.title }} tasklist?!</h2>
 <form method="post">
     <button type="submit" class="btn btn-danger">Delete</button>

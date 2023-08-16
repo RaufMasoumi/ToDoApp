@@ -16,19 +16,25 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
+    # Local
+    path('', RedirectView.as_view(pattern_name='tasklist-list'), name='home'),
     path('accounts/', include('accounts.urls')),
-    path('', include('tasks.urls')),
+    path('tasks/', include('tasks.urls')),
+    path('tasklists/', include('tasklists.urls')),
 ]
 
 api_urlpatterns = [
     path('api/accounts/', include('rest_framework.urls')),
     path('api/accounts/rest-auth/', include('dj_rest_auth.urls')),
+    # Local
     path('api/accounts/', include('accounts.api_urls')),
-    path('api/', include('tasks.api_urls')),
+    path('api/tasks/', include('tasks.api_urls')),
+    path('api/tasklists/', include('tasklists.api_urls')),
 
 ]
 

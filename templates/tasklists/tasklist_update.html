@@ -1,0 +1,11 @@
+{% extends '_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<h1>Update <a href="{{ tasklist.get_absolute_url }}">{{ tasklist.title }}</a></h1>
+<form method="post">
+    {{ form | crispy }}
+    <button type="submit" class="btn btn-success">Update</button>
+    {% csrf_token %}
+</form>
+{% endblock %}

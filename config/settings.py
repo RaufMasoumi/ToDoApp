@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     # Local
     'accounts.apps.AccountsConfig',
     'tasks.apps.TasksConfig',
+    'tasklists.apps.TasklistsConfig',
 ]
 
 MIDDLEWARE = [

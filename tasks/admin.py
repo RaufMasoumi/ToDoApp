@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Task, TaskList, ListTaskPriority
+from .models import Task
 # Register your models here.
 
 
@@ -12,10 +12,5 @@ class TaskAdmin(admin.ModelAdmin):
     list_display = [short_title, 'due_date', 'is_done']
 
 
-class TaskListAdmin(admin.ModelAdmin):
-    prepopulated_fields = {'slug': ['title', ]}
-
-
 admin.site.register(Task, TaskAdmin)
-admin.site.register(TaskList, TaskListAdmin)
-admin.site.register(ListTaskPriority)
+
