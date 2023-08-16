@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+from django.urls import reverse
 import uuid
 # Create your models here.
 
@@ -29,6 +30,9 @@ class Task(models.Model):
 
     def __str__(self):
         return self.title
+
+    def get_absolute_url(self):
+        return reverse('task-detail', kwargs={'pk': self.pk})
 
     def get_short_title(self):
         if len(self.title) >= 30:
