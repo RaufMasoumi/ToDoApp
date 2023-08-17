@@ -46,5 +46,7 @@ class Task(models.Model):
     ):
         if self.is_done:
             self.done_at = timezone.now()
+        else:
+            self.done_at = None
 
         return super().save(force_insert, force_update, using, update_fields)

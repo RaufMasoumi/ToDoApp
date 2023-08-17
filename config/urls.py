@@ -32,6 +32,7 @@ api_urlpatterns = [
     path('api/accounts/', include('rest_framework.urls')),
     path('api/accounts/rest-auth/', include('dj_rest_auth.urls')),
     # Local
+    path('api/', RedirectView.as_view(pattern_name='api-tasklist-list'), name='api-home'),
     path('api/accounts/', include('accounts.api_urls')),
     path('api/tasks/', include('tasks.api_urls')),
     path('api/tasklists/', include('tasklists.api_urls')),

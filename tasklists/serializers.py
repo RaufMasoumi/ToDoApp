@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from tasks.serializers import TaskNestedSerializer
 from .models import TaskList
 
 
@@ -19,7 +20,7 @@ class TaskListListSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class TaskListDetailSerializer(serializers.HyperlinkedModelSerializer):
-    tasks = serializers.StringRelatedField(many=True)
+    tasks = TaskNestedSerializer(many=True, read_only=True)
 
     class Meta:
         model = TaskList

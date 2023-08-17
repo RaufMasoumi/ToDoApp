@@ -3,13 +3,13 @@ from .serializers import TaskListListSerializer, TaskListDetailSerializer
 from .views import TaskListUserQuerysetMixin
 
 
-class TaskListListCreateApiView(TaskListUserQuerysetMixin, ListCreateAPIView):
+class TaskListLCApiView(TaskListUserQuerysetMixin, ListCreateAPIView):
     serializer_class = TaskListListSerializer
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
 
-class TaskListRetrieveDestroyApiView(TaskListUserQuerysetMixin, RetrieveDestroyAPIView):
+class TaskListRDApiView(TaskListUserQuerysetMixin, RetrieveDestroyAPIView):
     lookup_field = 'slug'
     serializer_class = TaskListDetailSerializer
