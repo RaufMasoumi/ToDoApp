@@ -4,7 +4,11 @@
 {% block content %}
 <h1>Delete Task</h1>
 <form method="post">
-    <h3>Are you sure you want to delete '{{ task.get_short_title }}' Task?!</h3>
+    {% if tasklist %}
+        <h3>Are you sure you want to remove '{{ task.get_short_title }}' Task from {{ tasklist.title }}?!</h3>
+    {% else %}
+        <h3>Are you sure you want to delete '{{ task.get_short_title }}' Task ?!</h3>
+    {% endif %}
     {% csrf_token %}
     <button type="submit" class="btn btn-danger">Delete</button>
 </form>

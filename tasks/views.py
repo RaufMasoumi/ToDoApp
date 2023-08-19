@@ -39,3 +39,11 @@ class TaskUpdateView(AllauthLoginRequiredMixin, UserTaskQuerysetMixin, UpdateVie
 class TaskDeleteView(AllauthLoginRequiredMixin, UserTaskQuerysetMixin, DeleteView):
     template_name = 'tasks/task_delete.html'
     success_url = reverse_lazy('home')
+
+    def get_success_url(self):
+        success_url = self.success_url
+        get = self.request.GET
+        if get.get('tasklist'):
+            tasklist = self.request.user.tasklists.get(slug=get['tasklist'])
+            success_url = tasklist.get_absolute_url()
+        return success_url

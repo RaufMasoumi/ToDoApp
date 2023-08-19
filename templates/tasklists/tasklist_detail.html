@@ -24,12 +24,14 @@
 </p>
 <p>
     <h5><a href="{% url 'tasklist-task-update' tasklist.slug task.pk %}">Update Task</a></h5>
+    <h5><a href="{% url 'tasklist-task-delete' tasklist.slug task.pk %}">Remove Task from tasklist</a></h5>
+    <h5><a href="{% url 'task-delete' task.pk %}?tasklist={{ tasklist.slug }}">Delete Task</a></h5>
 </p>
 <hr>
 {% endfor %}
     <h3><a href="{% url 'tasklist-task-create' tasklist.slug %}">Create a new task</a></h3>
     <hr>
-    <h3 class="btn btn-success"><a href="{% url 'tasklist-update' tasklist.slug %}">Update {{ tasklist.title }} tasklist</a></h3>
-    <h3 class="btn btn-danger"><a href="{% url 'tasklist-delete' tasklist.slug %}">Delete {{ tasklist.title }} tasklist</a></h3>
+    <h3><a href="{% url 'tasklist-update' tasklist.slug %}">Update {{ tasklist.title }} tasklist</a></h3> |
+    <h3><a href="{% url 'tasklist-delete' tasklist.slug %}">Delete {{ tasklist.title }} tasklist</a></h3>
 
 {% endblock %}

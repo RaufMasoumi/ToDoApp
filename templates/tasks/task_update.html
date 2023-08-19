@@ -9,5 +9,6 @@
     {{ form | crispy }}
     <button type="submit" class="btn btn-success">Update</button>
 </form>
-
+<hr>
+    <h3><a href="{% url 'task-delete' task.pk %}">Delete Task</a></h3>
 {% endblock %}
