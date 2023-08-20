@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.views.generic import DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
@@ -14,7 +13,7 @@ class UserTaskQuerysetMixin:
     request = None
 
     def get_queryset(self):
-        return Task.objects.user_task(self.request.user)
+        return self.request.user.tasks.all()
 
 
 class TaskDetailView(AllauthLoginRequiredMixin, UserTaskQuerysetMixin, DetailView):

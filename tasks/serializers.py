@@ -5,7 +5,9 @@ from .models import Task
 class TaskDetailSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Task
-        fields = '__all__'
+        fields = ['id', 'user', 'title', 'due_date', 'is_done', 'is_important', 'is_not_important',
+                  'is_timely_important', 'created_at', 'updated_at', 'done_at']
+
         extra_kwargs = {
             'url': {'view_name': 'api-task-detail'},
             'user': {'view_name': 'api-user-detail', 'lookup_field': 'slug', 'read_only': True},

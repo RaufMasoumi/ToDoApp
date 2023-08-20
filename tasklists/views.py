@@ -1,17 +1,11 @@
-from django.shortcuts import render, reverse, get_object_or_404
+from django.shortcuts import reverse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.http import HttpResponseRedirect
-from tasks.views import AllauthLoginRequiredMixin, UserTaskQuerysetMixin, TaskUpdateView
+from tasks.views import AllauthLoginRequiredMixin, TaskUpdateView
 from tasks.models import Task
+from .mixins import TaskListUserQuerysetMixin, DynamicTaskListTaskQuerysetMixin
 from .models import TaskList
 # Create your views here.
-
-
-class TaskListUserQuerysetMixin:
-    request = None
-
-    def get_queryset(self):
-        return TaskList.objects.user_tasklist(user=self.request.user)
 
 
 class TaskListListView(AllauthLoginRequiredMixin, TaskListUserQuerysetMixin, ListView):
@@ -51,16 +45,14 @@ class TaskListTaskCreateView(AllauthLoginRequiredMixin, CreateView):
     fields = ('title', 'due_date', 'is_important', 'is_not_important', 'is_timely_important')
 
     def get_object(self, queryset=None):
-        queryset = TaskList.objects.user_tasklist(self.request.user)
+        queryset = self.request.user.tasklists.all()
         self.slug_url_kwarg = 'tasklist'
         return super().get_object(queryset=queryset)
 
     def form_valid(self, form):
         form.instance.user = self.request.user
         task = self.object = form.save()
-        tasklist = self.get_object()
-        tasklist.tasks.add(task)
-        tasklist.save()
+        tasklist = add_task_to_tasklist(self.get_object(), task)
         return HttpResponseRedirect(tasklist.get_absolute_url())
 
     def get_context_data(self, **kwargs):
@@ -80,24 +72,26 @@ class TaskListTaskUpdateView(TaskUpdateView):
             return success_url
 
 
-class TaskListTaskDeleteView(AllauthLoginRequiredMixin, DeleteView):
+class TaskListTaskDeleteView(AllauthLoginRequiredMixin, DynamicTaskListTaskQuerysetMixin, DeleteView):
     template_name = 'tasks/task_delete.html'
 
-    def get_tasklist(self):
-        tasklist_queryset = TaskList.objects.user_tasklist(self.request.user)
-        tasklist = get_object_or_404(tasklist_queryset, slug=self.kwargs.get('tasklist'))
-        return tasklist
-
-    def get_queryset(self):
-        return self.get_tasklist().tasks.all()
-
     def form_valid(self, form):
-        tasklist = self.get_tasklist()
-        tasklist.tasks.remove(self.get_object())
-        tasklist.save()
+        tasklist = remove_task_from_tasklist(self.get_tasklist(), self.get_object())
         return HttpResponseRedirect(tasklist.get_absolute_url())
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['tasklist'] = self.get_tasklist()
         return context
+
+
+def add_task_to_tasklist(tasklist, task):
+    tasklist.tasks.add(task)
+    tasklist.save()
+    return tasklist
+
+
+def remove_task_from_tasklist(tasklist, task):
+    tasklist.tasks.remove(task)
+    tasklist.save()
+    return tasklist
