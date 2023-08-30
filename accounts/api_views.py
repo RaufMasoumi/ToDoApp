@@ -1,14 +1,18 @@
+from django.shortcuts import redirect
 from django.contrib.auth import get_user_model
 from rest_framework.generics import RetrieveAPIView
+from .views import UserRedirectToPrimaryUrlMixin
 from .serializers import CustomUserDetailSerializer
+from .permissions import IsUserItSelfOrAdmin
 
 
-class UserProfileRetrieveApiView(RetrieveAPIView):
+class UserRedirectToPrimaryApiUrlMixin(UserRedirectToPrimaryUrlMixin):
+    def get_redirect_url(self):
+        return self.request.user.get_absolute_api_url()
+
+
+class UserProfileRetrieveApiView(UserRedirectToPrimaryApiUrlMixin, RetrieveAPIView):
     queryset = get_user_model()
     serializer_class = CustomUserDetailSerializer
     lookup_field = 'slug'
-
-    def get_object(self):
-        if not self.kwargs.get('slug'):
-            return self.request.user
-        return super().get_object()
+    permission_classes = (IsUserItSelfOrAdmin, )

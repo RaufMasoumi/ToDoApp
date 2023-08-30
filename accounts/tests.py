@@ -32,6 +32,9 @@ class CustomUserTests(TestCase):
         self.assertEqual(user, self.user)
         self.assertEqual(user.username, self.user.username)
 
+    def test_slug_auto_creation(self):
+        self.assertEqual(self.user.slug, 'testuser')
+
     def test_user_profile_view(self):
         # absolute url test
         self.assertEqual(self.user.get_absolute_url(), reverse('user-detail', kwargs={'slug': self.user.slug}))
@@ -50,7 +53,7 @@ class CustomUserTests(TestCase):
         self.assertTemplateUsed(response, 'accounts/user_detail.html')
         self.assertContains(response, self.user.username)
         self.assertNotContains(response, SHOULD_NOT_CONTAIN_TEXT)
-        # without passing kwargs
+        # with authentication but without passing kwargs
         response_without_kw = self.client.get(reverse('user-detail'))
         self.assertEqual(response_without_kw.status_code, status.HTTP_302_FOUND)
         self.assertRedirects(response_without_kw, reverse('user-detail', kwargs={'slug': self.user.slug}))

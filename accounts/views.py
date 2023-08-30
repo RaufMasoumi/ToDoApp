@@ -5,14 +5,22 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 # Create your views here.
 
 
-class UserProfile(LoginRequiredMixin, UserPassesTestMixin, DetailView):
-    model = get_user_model()
-    template_name = 'accounts/user_detail.html'
+class UserRedirectToPrimaryUrlMixin:
+    kwargs = None
+    request = None
+
+    def get_redirect_url(self):
+        return self.request.user.get_absolute_url()
 
     def dispatch(self, request, *args, **kwargs):
         if not self.kwargs.get('slug'):
-            return redirect(self.request.user)
+            return redirect(self.get_redirect_url())
         return super().dispatch(request, *args, **kwargs)
+
+
+class UserProfile(LoginRequiredMixin, UserRedirectToPrimaryUrlMixin, UserPassesTestMixin, DetailView):
+    model = get_user_model()
+    template_name = 'accounts/user_detail.html'
 
     def test_func(self):
         obj = self.get_object()
