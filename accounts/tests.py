@@ -2,9 +2,9 @@ from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
+from tasklists.tests import get_redirected_login_url, SHOULD_NOT_CONTAIN_TEXT
 from .models import CustomUser
 # Create your tests here.
-SHOULD_NOT_CONTAIN_TEXT = 'Hello I should not be in the template!'
 
 
 class CustomUserTests(TestCase):
@@ -32,23 +32,25 @@ class CustomUserTests(TestCase):
         self.assertEqual(user, self.user)
         self.assertEqual(user.username, self.user.username)
 
-    def test_slug_auto_creation(self):
+    def test_user_slug_auto_creation(self):
         self.assertEqual(self.user.slug, 'testuser')
 
     def test_user_profile_view(self):
+        path = reverse('user-detail', kwargs={'slug': self.user.slug})
         # absolute url test
-        self.assertEqual(self.user.get_absolute_url(), reverse('user-detail', kwargs={'slug': self.user.slug}))
+        self.assertEqual(self.user.get_absolute_url(), path)
         # without authentication
-        no_response = self.client.get(self.user.get_absolute_url())
+        no_response = self.client.get(path)
         self.assertEqual(no_response.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(no_response, get_redirected_login_url(path))
         # with authentication but not user itself
         self.client.force_login(self.superuser)
-        no_response = self.client.get(self.user.get_absolute_url())
+        no_response = self.client.get(path)
         self.assertEqual(no_response.status_code, status.HTTP_403_FORBIDDEN)
         self.client.logout()
         # with authentication and user itself
         self.client.force_login(self.user)
-        response = self.client.get(self.user.get_absolute_url())
+        response = self.client.get(path)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTemplateUsed(response, 'accounts/user_detail.html')
         self.assertContains(response, self.user.username)

@@ -25,11 +25,20 @@ class TaskList(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     objects = TaskListManager()
 
+    class Meta:
+        ordering = ['-created_at', 'title']
+
     def __str__(self):
         return self.title
 
     def get_absolute_url(self):
         return reverse('tasklist-detail', kwargs={'slug': self.slug})
+
+    def get_absolute_update_url(self):
+        return reverse('tasklist-update', kwargs={'slug': self.slug})
+
+    def get_absolute_delete_url(self):
+        return reverse('tasklist-delete', kwargs={'slug': self.slug})
 
     def clean_tasks(self):
         if self.tasks.exclude(user=self.user).exists():
