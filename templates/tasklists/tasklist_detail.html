@@ -31,7 +31,7 @@
 {% endfor %}
     <h3><a href="{% url 'tasklist-task-create' tasklist.slug %}">Create a new task</a></h3>
     <hr>
-    <h3><a href="{% url 'tasklist-update' tasklist.slug %}">Update {{ tasklist.title }} tasklist</a></h3> |
-    <h3><a href="{% url 'tasklist-delete' tasklist.slug %}">Delete {{ tasklist.title }} tasklist</a></h3>
+    <h3><a href="{{ tasklist.get_absolute_update_url }}">Update {{ tasklist.title }} tasklist</a></h3> |
+    <h3><a href="{{ tasklist.get_absolute_delete_url }}">Delete {{ tasklist.title }} tasklist</a></h3>
 
 {% endblock %}
