@@ -5,51 +5,14 @@ from django.utils import timezone
 from rest_framework import status
 from tasks.models import Task
 from .models import TaskList
+from .mixins import ViewBadUserTestsMixin
 # Create your tests here.
 
 SHOULD_NOT_CONTAIN_TEXT = 'Hello I should not be in the template!'
 
 
-def get_redirected_login_url(coming_from):
-    return reverse('account_login') + f'?next={coming_from}'
-
-
-class CustomTestCase(TestCase):
-
-    def get_bad_user(self):
-        return getattr(self, 'bad_user', None)
-
-    def login_required_test(self, path):
-        # without authentication
-        no_response = self.client.get(path)
-        self.assertEqual(no_response.status_code, status.HTTP_302_FOUND)
-        self.assertRedirects(no_response, get_redirected_login_url(path))
-
-    def user_itself_or_404_test(self, path, bad_user=None):
-        bad_user = bad_user or self.get_bad_user()
-        # with authentication but not user itself
-        self.client.force_login(bad_user)
-        no_response = self.client.get(path)
-        self.assertEqual(no_response.status_code, status.HTTP_404_NOT_FOUND)
-        self.client.logout()
-
-    def user_itself_or_200_but_nothing_exists_test(self, path, bad_user=None, should_not_contain_content=None):
-        bad_user = bad_user or self.get_bad_user()
-        # with authentication but not user itself
-        self.client.force_login(bad_user)
-        no_response = self.client.get(path)
-        self.assertEqual(no_response.status_code, status.HTTP_200_OK)
-        if should_not_contain_content:
-            self.assertNotContains(no_response, should_not_contain_content)
-        self.client.logout()
-
-    def login_required_and_user_itself_or_404_test(self, path, bad_user=None):
-        self.login_required_test(path)
-        self.user_itself_or_404_test(path, bad_user)
-
-    def login_required_and_user_itself_or_nothing_exists_test(self, path, bad_user=None, should_not_contain_content=None):
-        self.login_required_test(path)
-        self.user_itself_or_200_but_nothing_exists_test(path, bad_user, should_not_contain_content)
+class CustomTestCase(ViewBadUserTestsMixin, TestCase):
+    pass
 
 
 class TaskListTests(CustomTestCase):
@@ -108,7 +71,7 @@ class TaskListTests(CustomTestCase):
         # absolute url test
         self.assertEqual(self.tasklist.get_absolute_url(), path)
         # bad user test
-        self.login_required_and_user_itself_or_404_test(path)
+        self.login_required_and_user_itself_or_somecode_test(path)
         # correct user test
         self.client.force_login(self.user)
         response = self.client.get(path)
@@ -149,7 +112,7 @@ class TaskListTests(CustomTestCase):
         # absolute update url test
         self.assertEqual(self.tasklist.get_absolute_update_url(), path)
         # bad user test
-        self.login_required_and_user_itself_or_404_test(path)
+        self.login_required_and_user_itself_or_somecode_test(path)
         # correct user test
         self.client.force_login(self.user)
         # get
@@ -177,7 +140,7 @@ class TaskListTests(CustomTestCase):
         # absolute delete url test
         self.assertEqual(self.tasklist.get_absolute_delete_url(), path)
         # bad user test
-        self.login_required_and_user_itself_or_404_test(path)
+        self.login_required_and_user_itself_or_somecode_test(path)
         # correct user test
         self.client.force_login(self.user)
         # get

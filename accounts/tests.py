@@ -1,13 +1,12 @@
-from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
-from tasklists.tests import get_redirected_login_url, SHOULD_NOT_CONTAIN_TEXT
+from tasklists.tests import CustomTestCase, SHOULD_NOT_CONTAIN_TEXT
 from .models import CustomUser
 # Create your tests here.
 
 
-class CustomUserTests(TestCase):
+class CustomUserTests(CustomTestCase):
 
     @classmethod
     def setUpTestData(cls):
@@ -39,25 +38,17 @@ class CustomUserTests(TestCase):
         path = reverse('user-detail', kwargs={'slug': self.user.slug})
         # absolute url test
         self.assertEqual(self.user.get_absolute_url(), path)
-        # without authentication
-        no_response = self.client.get(path)
-        self.assertEqual(no_response.status_code, status.HTTP_302_FOUND)
-        self.assertRedirects(no_response, get_redirected_login_url(path))
-        # with authentication but not user itself
-        self.client.force_login(self.superuser)
-        no_response = self.client.get(path)
-        self.assertEqual(no_response.status_code, status.HTTP_403_FORBIDDEN)
-        self.client.logout()
-        # with authentication and user itself
+        # bad user test
+        self.login_required_and_user_itself_or_somecode_test(path, self.superuser, status.HTTP_403_FORBIDDEN)
+        # correct user test
         self.client.force_login(self.user)
         response = self.client.get(path)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTemplateUsed(response, 'accounts/user_detail.html')
         self.assertContains(response, self.user.username)
         self.assertNotContains(response, SHOULD_NOT_CONTAIN_TEXT)
-        # with authentication but without passing kwargs
+        # without passing kwargs
         response_without_kw = self.client.get(reverse('user-detail'))
         self.assertEqual(response_without_kw.status_code, status.HTTP_302_FOUND)
         self.assertRedirects(response_without_kw, reverse('user-detail', kwargs={'slug': self.user.slug}))
         self.client.logout()
-
