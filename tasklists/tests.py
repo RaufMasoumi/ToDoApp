@@ -156,3 +156,116 @@ class TaskListTests(CustomTestCase):
         self.assertRedirects(delete_response, reverse('tasklist-list'))
         self.assertFalse(TaskList.objects.filter(id=self.tasklist.id).exists())
         self.client.logout()
+
+
+class TaskListTaskTests(CustomTestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = get_user_model().objects.create_user(
+            username='testuser',
+            password='testpass123'
+        )
+        cls.bad_user = get_user_model().objects.create_user(
+            username='testbaduser',
+            password='testpass1123'
+        )
+
+    def setUp(self):
+        self.tasklist = TaskList.objects.create(
+            user=self.user,
+            title='testtasklist',
+        )
+        self.task = Task.objects.create(
+            user=self.user,
+            title='testtask'
+        )
+        self.tasklist.tasks.add(self.task)
+
+    def test_tasklist_task_create_view(self):
+        path = reverse('tasklist-task-create', kwargs={'tasklist': self.tasklist.slug})
+        # bad user test
+        self.login_required_and_user_itself_or_somecode_test(path)
+        # correct user test
+        self.client.force_login(self.user)
+        # get
+        get_response = self.client.get(path)
+        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
+        self.assertContains(get_response, 'Create')
+        self.assertContains(get_response, self.tasklist.title)
+        self.assertNotContains(get_response, 'Update')
+        self.assertTemplateUsed(get_response, 'tasks/task_create.html')
+        # post
+        data = {
+            'title': 'new task',
+            'user': self.bad_user
+        }
+        post_response = self.client.post(path, data)
+        self.assertEqual(post_response.status_code, status.HTTP_302_FOUND)
+        created_task = Task.objects.first()
+        self.assertEqual(created_task.title, data['title'])
+        # user set to the requested user anytime
+        self.assertEqual(created_task.user, self.user)
+        # task added to the tasklist
+        self.assertTrue(self.tasklist.tasks.filter(pk=created_task.pk).exists())
+        self.client.logout()
+
+    def test_tasklist_task_update_view(self):
+        path = reverse('tasklist-task-update', kwargs={
+            'tasklist': self.tasklist.slug,
+            'pk': self.task.pk
+        })
+        # bad user test
+        self.login_required_and_user_itself_or_somecode_test(path)
+        # correct user test
+        self.client.force_login(self.user)
+        # get
+        get_response = self.client.get(path)
+        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
+        self.assertContains(get_response, 'Update')
+        self.assertContains(get_response, self.task.title)
+        self.assertNotContains(get_response, SHOULD_NOT_CONTAIN_TEXT)
+        self.assertTemplateUsed(get_response, 'tasks/task_update.html')
+        # post
+        data = {
+            'title': 'updated'
+        }
+        post_response = self.client.post(path, data)
+        self.assertEqual(post_response.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(post_response, self.tasklist.get_absolute_url())
+        self.task.refresh_from_db()
+        self.assertEqual(self.task.title, data['title'])
+        self.client.logout()
+
+    def test_tasklist_task_delete_view(self):
+        path = reverse('tasklist-task-delete', kwargs={
+            'tasklist': self.tasklist.slug,
+            'pk': self.task.pk
+        })
+        # bad user test
+        self.login_required_and_user_itself_or_somecode_test(path)
+        # correct user test
+        self.client.force_login(self.user)
+        # get
+        get_response = self.client.get(path)
+        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
+        self.assertContains(get_response, 'Delete')
+        self.assertContains(get_response, self.task.title)
+        self.assertContains(get_response, self.tasklist.title)
+        self.assertNotContains(get_response, 'Update')
+        self.assertTemplateUsed(get_response, 'tasks/task_delete.html')
+        # post (as delete)
+        post_response = self.client.post(path)
+        self.assertEqual(post_response.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(post_response, self.tasklist.get_absolute_url())
+        self.assertFalse(self.tasklist.tasks.filter(pk=self.task.pk).exists())
+        self.assertTrue(Task.objects.filter(pk=self.task.pk).exists())
+        self.client.logout()
+
+
+
+
+
+
+
+

@@ -75,7 +75,10 @@ class TaskListTaskUpdateView(TaskUpdateView):
 class TaskListTaskDeleteView(AllauthLoginRequiredMixin, DynamicTaskListTaskQuerysetMixin, DeleteView):
     template_name = 'tasks/task_delete.html'
 
-    def form_valid(self, form):
+    def get_success_url(self):
+        return self.get_tasklist().get_absolute_url()
+
+    def form_valid(self, form=None):
         tasklist = remove_task_from_tasklist(self.get_tasklist(), self.get_object())
         return HttpResponseRedirect(tasklist.get_absolute_url())
 
