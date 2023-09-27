@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.contrib.auth import get_user_model
 from rest_framework import status
 
 
@@ -28,6 +29,17 @@ def get_redirected_login_url(coming_from):
 
 
 class ViewBadUserTestsMixin:
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = get_user_model().objects.create_user(
+            username='testuser',
+            password='testpass123'
+        )
+        cls.bad_user = get_user_model().objects.create_user(
+            username='testbaduser',
+            password='testpass1123'
+        )
 
     def get_bad_user(self):
         return getattr(self, 'bad_user', None)

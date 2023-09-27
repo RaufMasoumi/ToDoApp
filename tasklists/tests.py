@@ -1,5 +1,4 @@
 from django.test import TestCase
-from django.contrib.auth import get_user_model
 from django.shortcuts import reverse
 from django.utils import timezone
 from rest_framework import status
@@ -16,17 +15,6 @@ class CustomTestCase(ViewBadUserTestsMixin, TestCase):
 
 
 class TaskListTests(CustomTestCase):
-
-    @classmethod
-    def setUpTestData(cls):
-        cls.user = get_user_model().objects.create_user(
-            username='testuser',
-            password='testpass123'
-        )
-        cls.bad_user = get_user_model().objects.create_user(
-            username='testbaduser',
-            password='testpass1123'
-        )
 
     def setUp(self):
         self.tasklist = TaskList.objects.create(
@@ -159,17 +147,6 @@ class TaskListTests(CustomTestCase):
 
 
 class TaskListTaskTests(CustomTestCase):
-
-    @classmethod
-    def setUpTestData(cls):
-        cls.user = get_user_model().objects.create_user(
-            username='testuser',
-            password='testpass123'
-        )
-        cls.bad_user = get_user_model().objects.create_user(
-            username='testbaduser',
-            password='testpass1123'
-        )
 
     def setUp(self):
         self.tasklist = TaskList.objects.create(
