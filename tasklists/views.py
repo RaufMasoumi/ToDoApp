@@ -1,7 +1,8 @@
 from django.shortcuts import reverse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.http import HttpResponseRedirect
-from tasks.views import AllauthLoginRequiredMixin, TaskUpdateView
+from tasks.views import TaskUpdateView
+from tasks.mixins import AllauthLoginRequiredMixin
 from tasks.models import Task
 from .mixins import TaskListUserQuerysetMixin, DynamicTaskListTaskQuerysetMixin
 from .models import TaskList

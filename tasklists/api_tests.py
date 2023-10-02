@@ -28,14 +28,15 @@ class TaskListAPITests(CustomAPITestCase):
     def test_tasklist_lc_api_view(self):
         path = reverse('api-tasklist-list')
         # bad user test
-        self.login_required_and_user_itself_or_nothing_exists_test(path, should_not_contain_content=self.tasklist.title)
+        content = [self.tasklist.title, self.tasklist2.title]
+        self.login_required_and_user_itself_or_nothing_exists_test(path, should_not_contain_content=content)
         # correct user test
         self.client.force_login(self.user)
         # get
         get_response = self.client.get(path)
         self.assertEqual(get_response.status_code, status.HTTP_200_OK)
-        self.assertContains(get_response, self.tasklist.title)
-        self.assertContains(get_response, self.tasklist2.title)
+        for content in content:
+            self.assertContains(get_response, content)
         self.assertNotContains(get_response, SHOULD_NOT_CONTAIN_TEXT)
         # post
         data = {

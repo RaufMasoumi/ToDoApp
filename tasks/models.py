@@ -34,6 +34,12 @@ class Task(models.Model):
     def get_absolute_url(self):
         return reverse('task-detail', kwargs={'pk': self.pk})
 
+    def get_absolute_update_url(self):
+        return reverse('task-update', kwargs={'pk': self.pk})
+
+    def get_absolute_delete_url(self):
+        return reverse('task-delete', kwargs={'pk': self.pk})
+
     def get_short_title(self):
         if len(self.title) >= 30:
             short_title = self.title[:30] + ' ...'

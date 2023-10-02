@@ -1,7 +1,7 @@
 from rest_framework.generics import CreateAPIView, RetrieveUpdateDestroyAPIView
 from .models import Task
 from .serializers import TaskDetailSerializer
-from .views import UserTaskQuerysetMixin
+from .mixins import UserTaskQuerysetMixin
 
 
 class TaskRUDApiView(UserTaskQuerysetMixin, RetrieveUpdateDestroyAPIView):

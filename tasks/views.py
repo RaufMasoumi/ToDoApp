@@ -1,19 +1,12 @@
-from django.views.generic import DetailView, CreateView, UpdateView, DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
+from .mixins import AllauthLoginRequiredMixin, UserTaskQuerysetMixin
 from .models import Task
 # Create your views here.
 
 
-class AllauthLoginRequiredMixin(LoginRequiredMixin):
-    login_url = reverse_lazy('account_login')
-
-
-class UserTaskQuerysetMixin:
-    request = None
-
-    def get_queryset(self):
-        return self.request.user.tasks.all()
+class TaskListView(AllauthLoginRequiredMixin, UserTaskQuerysetMixin, ListView):
+    template_name = 'tasks/task_list.html'
 
 
 class TaskDetailView(AllauthLoginRequiredMixin, UserTaskQuerysetMixin, DetailView):
@@ -37,7 +30,7 @@ class TaskUpdateView(AllauthLoginRequiredMixin, UserTaskQuerysetMixin, UpdateVie
 
 class TaskDeleteView(AllauthLoginRequiredMixin, UserTaskQuerysetMixin, DeleteView):
     template_name = 'tasks/task_delete.html'
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('task-list')
 
     def get_success_url(self):
         success_url = self.success_url

@@ -43,14 +43,15 @@ class TaskListTests(CustomTestCase):
     def test_tasklist_list_view(self):
         path = reverse('tasklist-list')
         # bad user test
-        self.user_itself_or_200_but_nothing_exists_test(path, should_not_contain_content=self.tasklist.title)
+        content = [self.tasklist.title, self.tasklist2.title]
+        self.login_required_and_user_itself_or_nothing_exists_test(path, should_not_contain_content=content)
         # correct user test
         self.client.force_login(self.user)
         response = self.client.get(path)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.context.get('tasklists')), 2)
-        self.assertContains(response, self.tasklist.title)
-        self.assertContains(response, self.tasklist2.title)
+        for content in content:
+            self.assertContains(response, content)
         self.assertNotContains(response, SHOULD_NOT_CONTAIN_TEXT)
         self.assertTemplateUsed(response, 'tasklists/tasklist_list.html')
 

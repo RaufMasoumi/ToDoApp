@@ -13,12 +13,14 @@
     {% if user %}
         <h3>Logged in as <a href="{{ user.get_absolute_url }}">{{ user.username }}</a></h3>
         <a href="{% url 'account_logout' %}">Logout</a>
+        <hr>
     {% else %}
         <a href="{% url 'account_login' %}">Login</a>
     {% endif %}
     {% block content %}{% endblock %}
     <hr>
-    <a href="{% url 'tasklist-list' %}">Task Lists</a>
+    <a href="{% url 'tasklist-list' %}">Task Lists</a> |
+    <a href="{% url 'task-list' %}">All tasks</a>
     <hr>
     <a href="{% url 'api-home' %}">APIs</a>
     <!-- Optional JavaScript -->
