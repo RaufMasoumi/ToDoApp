@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from tasks.serializers import TaskNestedSerializer
+from tasks.nested_serializers import TaskNestedSerializer
 from .models import TaskList
 
 
@@ -30,3 +30,5 @@ class TaskListDetailSerializer(serializers.HyperlinkedModelSerializer):
             'url': {'view_name': 'api-tasklist-detail', 'lookup_field': 'slug'},
             'user': {'view_name': 'api-user-detail', 'lookup_field': 'slug'}
         }
+
+

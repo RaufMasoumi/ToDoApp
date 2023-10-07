@@ -86,7 +86,18 @@ def update_task_number(task_p: TaskListTaskPriority, new_number: int):
 @receiver(m2m_changed, sender=TaskList.tasks.through)
 def create_priority_for_task(instance, action, pk_set, **kwargs):
     if action == 'post_add':
-        for pk in pk_set:
-            task = Task.objects.get(pk=pk)
-            new_number = TaskListTaskPriority.objects.count() + 1
-            TaskListTaskPriority.objects.create(task=task, list=instance, number=new_number)
+        if isinstance(instance, Task):
+            task = instance
+            for pk in pk_set:
+                if TaskList.objects.filter(pk=pk).exists():
+                    tasklist = TaskList.objects.get(pk=pk)
+                    new_number = tasklist.tasks.count()
+                    TaskListTaskPriority.objects.create(task=task, list=tasklist, number=new_number)
+
+        elif isinstance(instance, TaskList):
+            tasklist = instance
+            for pk in pk_set:
+                if Task.objects.filter(pk=pk).exists():
+                    task = Task.objects.get(pk=pk)
+                    new_number = tasklist.tasks.count()
+                    TaskListTaskPriority.objects.create(task=task, list=instance, number=new_number)
