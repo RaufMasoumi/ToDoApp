@@ -10,7 +10,7 @@ class CustomAPITestCase(ViewBadUserTestsMixin, APITestCase):
     def login_required_test(self, path):
         # without authentication
         no_response = self.client.get(path)
-        self.assertEqual(no_response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(no_response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class TaskListAPITests(CustomAPITestCase):
