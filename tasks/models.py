@@ -24,9 +24,14 @@ class Task(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     done_at = models.DateTimeField(blank=True, null=True)
     objects = TaskManager()
+    __is_done = None
 
     class Meta:
         ordering = ['-updated_at', '-created_at']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__is_done = self.is_done
 
     def __str__(self):
         return self.title
@@ -50,9 +55,14 @@ class Task(models.Model):
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
-        if self.is_done:
-            self.done_at = timezone.now()
-        else:
-            self.done_at = None
+        if self.__is_done != self.is_done:
+            if self.is_done:
+                self.done_at = timezone.now()
+            else:
+                self.done_at = None
+            self.__is_done = self.is_done
+        elif self.__is_done == self.is_done and self.__is_done:
+            if not self.done_at:
+                self.done_at = timezone.now()
 
         return super().save(force_insert, force_update, using, update_fields)

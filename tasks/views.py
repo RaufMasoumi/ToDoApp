@@ -15,7 +15,7 @@ class TaskDetailView(AllauthLoginRequiredMixin, UserTaskQuerysetMixin, DetailVie
 
 class TaskCreateView(AllauthLoginRequiredMixin, CreateView):
     model = Task
-    fields = ('title', 'due_date', 'is_important', 'is_not_important', 'is_timely_important')
+    fields = ('title', 'due_date', 'is_important', 'is_not_important', 'is_timely_important', 'is_done')
     template_name = 'tasks/task_create.html'
 
     def form_valid(self, form):
@@ -24,7 +24,7 @@ class TaskCreateView(AllauthLoginRequiredMixin, CreateView):
 
 
 class TaskUpdateView(AllauthLoginRequiredMixin, UserTaskQuerysetMixin, UpdateView):
-    fields = ('title', 'due_date', 'is_important', 'is_not_important', 'is_timely_important')
+    fields = ('title', 'due_date', 'is_important', 'is_not_important', 'is_timely_important', 'is_done')
     template_name = 'tasks/task_update.html'
 
 

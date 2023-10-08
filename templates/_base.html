@@ -11,8 +11,9 @@
   </head>
   <body>
     {% if user %}
-        <h3>Logged in as <a href="{{ user.get_absolute_url }}">{{ user.username }}</a></h3>
+        <h6>Logged in as <a href="{{ user.get_absolute_url }}">{{ user.username }}</a> |
         <a href="{% url 'account_logout' %}">Logout</a>
+        </h6>
         <hr>
     {% else %}
         <a href="{% url 'account_login' %}">Login</a>

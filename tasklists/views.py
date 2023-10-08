@@ -43,7 +43,7 @@ class TaskListDeleteView(AllauthLoginRequiredMixin, TaskListUserQuerysetMixin, D
 class TaskListTaskCreateView(AllauthLoginRequiredMixin, CreateView):
     model = Task
     template_name = 'tasks/task_create.html'
-    fields = ('title', 'due_date', 'is_important', 'is_not_important', 'is_timely_important')
+    fields = ('title', 'due_date', 'is_important', 'is_not_important', 'is_timely_important', 'is_done')
 
     def get_object(self, queryset=None):
         queryset = self.request.user.tasklists.all()

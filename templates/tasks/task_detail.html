@@ -22,6 +22,9 @@
         <h4>Is in
             {% for tasklist in task.tasklists.all %}
                 <a href="{{ tasklist.get_absolute_url }}">{{ tasklist.title }}</a>
+                {% if task.tasklists.last != tasklist %}
+                    ,
+                {% endif %}
             {% endfor %}
             tasklist(s)
         </h4>
