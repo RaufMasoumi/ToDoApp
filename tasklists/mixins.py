@@ -4,8 +4,9 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 
 
-class TaskListUserQuerysetMixin:
-    request = None
+class UserTaskListQuerysetMixin:
+    def __init__(self, request=None):
+        self.request = request
 
     def get_queryset(self):
         return self.request.user.tasklists.all()

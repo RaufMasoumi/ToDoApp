@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.urls import reverse
 from django.utils.text import slugify
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 # Create your models here.
 
 
@@ -21,3 +23,16 @@ class CustomUser(AbstractUser):
         if not self.slug:
             self.slug = slugify(self.username)
         return super().save(*args, **kwargs)
+
+
+from tasklists.models import TaskList
+from tasks.models import DEFAULT_TASKLISTS
+
+
+@receiver(post_save, sender=CustomUser)
+def create_default_tasklists(instance, created, **kwargs):
+    if created:
+        default_tasklists = [
+            TaskList(user=instance, title=title, slug=slugify(title), is_default=True) for title in DEFAULT_TASKLISTS.values()
+        ]
+        TaskList.objects.bulk_create(default_tasklists)

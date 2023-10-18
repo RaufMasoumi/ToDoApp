@@ -5,6 +5,7 @@ from .models import TaskList, TaskListTaskPriority
 
 class TaskListAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ['title', ]}
+    list_display = ['title', 'user']
 
 
 admin.site.register(TaskList, TaskListAdmin)

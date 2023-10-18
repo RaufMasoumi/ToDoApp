@@ -5,14 +5,39 @@ from django.urls import reverse
 from django.utils.text import slugify
 from django.dispatch import receiver
 from django.db.models.signals import m2m_changed
-from tasks.models import Task
+from django.core.exceptions import MultipleObjectsReturned
+from tasks.models import Task, DEFAULT_TASKLISTS
 import uuid
 # Create your models here.
 
 
 class TaskListManager(models.Manager):
-    def user_tasklist(self, user):
-        return self.filter(user=user)
+
+    def handle_multiple_exception(getter):
+        def handler(self):
+            try:
+                tasklist = getter(self)
+            except MultipleObjectsReturned:
+                tasklist = None
+            return tasklist
+        return handler
+
+    # only use these methods from user tasklist manager
+    @handle_multiple_exception
+    def all_tasks(self):
+        return self.get(title=DEFAULT_TASKLISTS['all'])
+
+    @handle_multiple_exception
+    def important(self):
+        return self.get(title=DEFAULT_TASKLISTS['important'])
+
+    @handle_multiple_exception
+    def daily(self):
+        return self.get(title=DEFAULT_TASKLISTS['daily'])
+
+    @handle_multiple_exception
+    def done(self):
+        return self.get(title=DEFAULT_TASKLISTS['done'])
 
 
 class TaskList(models.Model):
@@ -21,12 +46,16 @@ class TaskList(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, blank=True)
     tasks = models.ManyToManyField(Task, related_name='tasklists', blank=True)
+    is_default = models.BooleanField(default=False, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     objects = TaskListManager()
 
     class Meta:
         ordering = ['-created_at', 'title']
+        permissions = [
+            ('default_tasklist', 'Can change default task list')
+        ]
 
     def __str__(self):
         return self.title
@@ -39,6 +68,10 @@ class TaskList(models.Model):
 
     def get_absolute_delete_url(self):
         return reverse('tasklist-delete', kwargs={'slug': self.slug})
+
+    def clean_title(self):
+        if self.user.tasklists.filter(title=self.title).exists():
+            raise ValidationError('TaskList title should be unique!', code='invalid')
 
     def clean_tasks(self):
         if self.tasks.exclude(user=self.user).exists():

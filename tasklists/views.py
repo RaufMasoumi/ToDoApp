@@ -1,20 +1,21 @@
-from django.shortcuts import reverse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.http import HttpResponseRedirect
+from django.urls import reverse, reverse_lazy
 from tasks.views import TaskUpdateView
 from tasks.mixins import AllauthLoginRequiredMixin
 from tasks.models import Task
-from .mixins import TaskListUserQuerysetMixin, DynamicTaskListTaskQuerysetMixin
+from .mixins import UserTaskListQuerysetMixin, DynamicTaskListTaskQuerysetMixin
+from .permissions import DefaultTaskListPermissionMixin
 from .models import TaskList
 # Create your views here.
 
 
-class TaskListListView(AllauthLoginRequiredMixin, TaskListUserQuerysetMixin, ListView):
+class TaskListListView(AllauthLoginRequiredMixin, UserTaskListQuerysetMixin, ListView):
     context_object_name = 'tasklists'
     template_name = 'tasklists/tasklist_list.html'
 
 
-class TaskListDetailView(AllauthLoginRequiredMixin, TaskListUserQuerysetMixin, DetailView):
+class TaskListDetailView(AllauthLoginRequiredMixin, UserTaskListQuerysetMixin, DetailView):
     template_name = 'tasklists/tasklist_detail.html'
 
 
@@ -28,25 +29,24 @@ class TaskListCreateView(AllauthLoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class TaskListUpdateView(AllauthLoginRequiredMixin, TaskListUserQuerysetMixin, UpdateView):
+class TaskListUpdateView(AllauthLoginRequiredMixin, DefaultTaskListPermissionMixin, UserTaskListQuerysetMixin, UpdateView):
     template_name = 'tasklists/tasklist_update.html'
     fields = ('title', 'tasks')
 
 
-class TaskListDeleteView(AllauthLoginRequiredMixin, TaskListUserQuerysetMixin, DeleteView):
+class TaskListDeleteView(AllauthLoginRequiredMixin, DefaultTaskListPermissionMixin, UserTaskListQuerysetMixin, DeleteView):
     template_name = 'tasklists/tasklist_delete.html'
-
-    def get_success_url(self):
-        return reverse('tasklist-list')
+    success_url = reverse_lazy('tasklist-list')
 
 
-class TaskListTaskCreateView(AllauthLoginRequiredMixin, CreateView):
+class TaskListTaskCreateView(AllauthLoginRequiredMixin, DefaultTaskListPermissionMixin, CreateView):
     model = Task
     template_name = 'tasks/task_create.html'
     fields = ('title', 'due_date', 'is_important', 'is_not_important', 'is_timely_important', 'is_done')
 
     def get_object(self, queryset=None):
-        queryset = self.request.user.tasklists.all()
+        mixin = UserTaskListQuerysetMixin(self.request)
+        queryset = mixin.get_queryset()
         self.slug_url_kwarg = 'tasklist'
         return super().get_object(queryset=queryset)
 
@@ -65,7 +65,7 @@ class TaskListTaskCreateView(AllauthLoginRequiredMixin, CreateView):
 class TaskListTaskUpdateView(TaskUpdateView):
     def get_success_url(self):
         try:
-            tasklist = TaskList.objects.get(slug=self.kwargs['tasklist'])
+            tasklist = self.request.user.tasklists.get(slug=self.kwargs['tasklist'])
         except TaskList.DoesNotExist:
             return super().get_success_url()
         else:
@@ -73,8 +73,9 @@ class TaskListTaskUpdateView(TaskUpdateView):
             return success_url
 
 
-class TaskListTaskDeleteView(AllauthLoginRequiredMixin, DynamicTaskListTaskQuerysetMixin, DeleteView):
+class TaskListTaskDeleteView(AllauthLoginRequiredMixin, DefaultTaskListPermissionMixin, DynamicTaskListTaskQuerysetMixin, DeleteView):
     template_name = 'tasks/task_delete.html'
+    tasklist_getter = 'get_tasklist'
 
     def get_success_url(self):
         return self.get_tasklist().get_absolute_url()
@@ -90,12 +91,14 @@ class TaskListTaskDeleteView(AllauthLoginRequiredMixin, DynamicTaskListTaskQuery
 
 
 def add_task_to_tasklist(tasklist, task):
-    tasklist.tasks.add(task)
-    tasklist.save()
+    if task not in tasklist.tasks.all():
+        tasklist.tasks.add(task)
+        tasklist.save()
     return tasklist
 
 
 def remove_task_from_tasklist(tasklist, task):
-    tasklist.tasks.remove(task)
-    tasklist.save()
+    if task in tasklist.tasks.all():
+        tasklist.tasks.remove(task)
+        tasklist.save()
     return tasklist

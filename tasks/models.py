@@ -2,13 +2,17 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 import uuid
+
 # Create your models here.
-
-
-class TaskManager(models.Manager):
-    def user_task(self, user):
-        return self.filter(user=user)
+DEFAULT_TASKLISTS = {
+    'all': 'All Tasks',
+    'important': 'Important Tasks',
+    'daily': 'Daily Tasks',
+    'done': 'Completed Tasks',
+}
 
 
 class Task(models.Model):
@@ -17,13 +21,13 @@ class Task(models.Model):
     title = models.CharField(max_length=300)
     due_date = models.DateTimeField(blank=True, null=True)
     is_done = models.BooleanField(default=False, blank=True)
+    is_daily = models.BooleanField(default=False, blank=True)
     is_important = models.BooleanField(default=False, blank=True)
     is_not_important = models.BooleanField(default=False, blank=True)
     is_timely_important = models.BooleanField(default=False, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     done_at = models.DateTimeField(blank=True, null=True)
-    objects = TaskManager()
     __is_done = None
 
     class Meta:
@@ -66,3 +70,22 @@ class Task(models.Model):
                 self.done_at = timezone.now()
 
         return super().save(force_insert, force_update, using, update_fields)
+
+
+@receiver(post_save, sender=Task)
+def add_task_to_default_tasklist(instance, created, **kwargs):
+    task = instance
+    statuses = list(DEFAULT_TASKLISTS.keys())
+    statuses.pop(statuses.index('all'))
+    if created:
+        task.user.tasklists.all_tasks().tasks.add(task)
+    for status in statuses:
+        bound_func = getattr(task.user.tasklists, status, None)
+        if callable(bound_func):
+            default_tasklist = bound_func()
+            is_status = getattr(task, f'is_{status}', False)
+            if default_tasklist:
+                if is_status and task not in default_tasklist.tasks.all():
+                    default_tasklist.tasks.add(task)
+                elif not is_status and task in default_tasklist.tasks.all():
+                    default_tasklist.tasks.remove(task)
