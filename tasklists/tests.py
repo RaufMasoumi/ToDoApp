@@ -1,8 +1,10 @@
 from django.test import TestCase
 from django.shortcuts import reverse
 from django.utils import timezone
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Permission
 from rest_framework import status
-from tasks.models import Task
+from tasks.models import Task, DEFAULT_TASKLISTS
 from .models import TaskList
 from .mixins import ViewBadUserTestsMixin
 # Create your tests here.
@@ -12,6 +14,33 @@ SHOULD_NOT_CONTAIN_TEXT = 'Hello I should not be in the template!'
 
 class CustomTestCase(ViewBadUserTestsMixin, TestCase):
     pass
+
+
+class DefaultTaskListTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = get_user_model().objects.create_user(
+            username='testuser',
+            password='testpass123'
+        )
+        cls.default_tasklist_permission = Permission.objects.get(codename='default_tasklist')
+
+    def test_user_default_tasklists_auto_creation(self):
+        self.assertQuerysetEqual(self.user.tasklists.default_tasklists(), self.user.tasklists.filter(is_default=True))
+        self.assertEqual(self.user.tasklists.default_tasklists().count(), len(DEFAULT_TASKLISTS))
+        for getter, title in DEFAULT_TASKLISTS.items():
+            self.assertEqual(getattr(self.user.tasklists, getter)(), self.user.tasklists.get(title=title))
+
+    def test_user_default_tasklists_permission(self):
+        # without permission
+        self.client.force_login(self.user)
+        path = reverse('tasklist-update', kwargs={'slug': 'all-tasks'})
+        no_response = self.client.get(path)
+        self.assertEqual(no_response.status_code, status.HTTP_403_FORBIDDEN)
+        # with permission
+        self.user.user_permissions.add(self.default_tasklist_permission)
+        response = self.client.get(path)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
 
 class TaskListTests(CustomTestCase):
@@ -32,7 +61,7 @@ class TaskListTests(CustomTestCase):
         self.tasklist.tasks.add(self.task)
 
     def test_tasklist_model(self):
-        self.assertEqual(TaskList.objects.count(), 2)
+        self.assertEqual(TaskList.objects.filter(is_default=False).count(), 2)
         tasklist = TaskList.objects.get(pk=self.tasklist.pk)
         self.assertEqual(tasklist, self.tasklist)
         self.assertEqual(tasklist.title, 'testtasklist')
@@ -49,7 +78,8 @@ class TaskListTests(CustomTestCase):
         self.client.force_login(self.user)
         response = self.client.get(path)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.context.get('tasklists')), 2)
+        # created tasklists + user default tasklists
+        self.assertEqual(len(response.context.get('tasklists')), 6)
         for content in content:
             self.assertContains(response, content)
         self.assertNotContains(response, SHOULD_NOT_CONTAIN_TEXT)

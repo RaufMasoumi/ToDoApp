@@ -25,7 +25,7 @@ class TaskListManager(models.Manager):
     # only use these methods from user tasklist manager
     @handle_multiple_exception
     def all_tasks(self):
-        return self.get(title=DEFAULT_TASKLISTS['all'])
+        return self.get(title=DEFAULT_TASKLISTS['all_tasks'])
 
     @handle_multiple_exception
     def important(self):
@@ -38,6 +38,12 @@ class TaskListManager(models.Manager):
     @handle_multiple_exception
     def done(self):
         return self.get(title=DEFAULT_TASKLISTS['done'])
+
+    def default_tasklists(self):
+        return self.filter(is_default=True)
+
+    def non_default_tasklists(self):
+        return self.filter(is_default=False)
 
 
 class TaskList(models.Model):

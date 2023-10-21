@@ -8,7 +8,7 @@ import uuid
 
 # Create your models here.
 DEFAULT_TASKLISTS = {
-    'all': 'All Tasks',
+    'all_tasks': 'All Tasks',
     'important': 'Important Tasks',
     'daily': 'Daily Tasks',
     'done': 'Completed Tasks',
@@ -76,7 +76,7 @@ class Task(models.Model):
 def add_task_to_default_tasklist(instance, created, **kwargs):
     task = instance
     statuses = list(DEFAULT_TASKLISTS.keys())
-    statuses.pop(statuses.index('all'))
+    statuses.pop(statuses.index('all_tasks'))
     if created:
         task.user.tasklists.all_tasks().tasks.add(task)
     for status in statuses:
