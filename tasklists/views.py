@@ -1,7 +1,7 @@
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.http import HttpResponseRedirect
 from django.urls import reverse, reverse_lazy
-from tasks.views import TaskUpdateView
+from tasks.views import TaskUpdateView, TASK_FIELDS
 from tasks.mixins import AllauthLoginRequiredMixin
 from tasks.models import Task
 from .mixins import UserTaskListQuerysetMixin, DynamicTaskListTaskQuerysetMixin
@@ -42,7 +42,7 @@ class TaskListDeleteView(AllauthLoginRequiredMixin, DefaultTaskListPermissionMix
 class TaskListTaskCreateView(AllauthLoginRequiredMixin, DefaultTaskListPermissionMixin, CreateView):
     model = Task
     template_name = 'tasks/task_create.html'
-    fields = ('title', 'due_date', 'is_important', 'is_not_important', 'is_timely_important', 'is_done')
+    fields = TASK_FIELDS
 
     def get_object(self, queryset=None):
         mixin = UserTaskListQuerysetMixin(self.request)

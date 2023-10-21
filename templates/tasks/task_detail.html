@@ -3,7 +3,12 @@
 {% block content %}
 
     <h1>{{ task.title }}</h1>
-    <h4>due date: {{ task.due_date }}</h4>
+    {% if task.due_date %}
+        <h4>due date: {{ task.due_date }}</h4>
+    {% endif %}
+    {% if task.is_daily %}
+        <h4>Daily</h4>
+    {% endif %}
     {% if task.is_important %}
         <h4 style="color: red">Important</h4>
     {% endif %}

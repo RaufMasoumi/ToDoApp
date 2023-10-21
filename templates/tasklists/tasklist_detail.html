@@ -6,7 +6,12 @@
 {% for task in tasklist.tasks.all %}
 <p>
     <h3><a href="{{ task.get_absolute_url }}">{{ task.title }}</a></h3>
-    <h4>due date: {{ task.due_date }}</h4>
+    {% if task.due_date %}
+        <h4>due date: {{ task.due_date }}</h4>
+    {% endif %}
+    {% if task.is_daily %}
+        <h4>Daily</h4>
+    {% endif %}
     {% if task.is_important %}
         <h4 style="color: red">Important</h4>
     {% endif %}

@@ -26,7 +26,9 @@ class DefaultTaskListPermissionMixin(PermissionRequiredMixin):
     tasklist_getter = 'get_object'
 
     def get_permission_required(self):
+        permissions = []
         tasklist = self.get_object() if self.tasklist_getter == 'get_object' else self.get_tasklist()
         if tasklist and tasklist.is_default:
-            return ['tasklists.default_tasklist', ]
+            permissions.append('tasklists.default_tasklist')
+        return permissions
 
