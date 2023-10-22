@@ -1,16 +1,8 @@
 from django.shortcuts import reverse
-from rest_framework.test import APITestCase
 from rest_framework import status
-from .mixins import ViewBadUserTestsMixin
+from tasks.api_tests import CustomAPITestCase
+from tasks.tests import SHOULD_NOT_CONTAIN_TEXT
 from .models import TaskList
-from .tests import SHOULD_NOT_CONTAIN_TEXT
-
-
-class CustomAPITestCase(ViewBadUserTestsMixin, APITestCase):
-    def login_required_test(self, path):
-        # without authentication
-        no_response = self.client.get(path)
-        self.assertEqual(no_response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class TaskListAPITests(CustomAPITestCase):

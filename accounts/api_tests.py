@@ -1,6 +1,6 @@
 from django.shortcuts import reverse
 from rest_framework import status
-from tasklists.api_tests import CustomAPITestCase
+from tasks.api_tests import CustomAPITestCase
 from .models import CustomUser
 
 

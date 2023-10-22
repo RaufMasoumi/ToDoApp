@@ -5,15 +5,10 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from rest_framework import status
 from tasks.models import Task, DEFAULT_TASKLISTS
+from tasks.tests import CustomTestCase, SHOULD_NOT_CONTAIN_TEXT
 from .models import TaskList
-from .mixins import ViewBadUserTestsMixin
+
 # Create your tests here.
-
-SHOULD_NOT_CONTAIN_TEXT = 'Hello I should not be in the template!'
-
-
-class CustomTestCase(ViewBadUserTestsMixin, TestCase):
-    pass
 
 
 class DefaultTaskListTests(TestCase):

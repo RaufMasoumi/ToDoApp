@@ -1,8 +1,15 @@
 from django.shortcuts import reverse
+from django.test import TestCase
 from rest_framework import status
-from tasklists.tests import CustomTestCase, SHOULD_NOT_CONTAIN_TEXT
+from .mixins import ViewBadUserTestsMixin
 from .models import Task
 # Create your tests here.
+
+SHOULD_NOT_CONTAIN_TEXT = 'Hello I should not be in the template!'
+
+
+class CustomTestCase(ViewBadUserTestsMixin, TestCase):
+    pass
 
 
 class TaskTests(CustomTestCase):
@@ -100,3 +107,5 @@ class TaskTests(CustomTestCase):
         self.assertRedirects(post_response, reverse('task-list'))
         self.assertFalse(Task.objects.filter(pk=self.task.pk).exists())
         self.client.logout()
+
+

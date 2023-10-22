@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
-from tasklists.tests import CustomTestCase, SHOULD_NOT_CONTAIN_TEXT
+from tasks.tests import CustomTestCase, SHOULD_NOT_CONTAIN_TEXT
 from .models import CustomUser
 # Create your tests here.
 

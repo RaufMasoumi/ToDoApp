@@ -22,7 +22,7 @@ class TaskListManager(models.Manager):
             return tasklist
         return handler
 
-    # only use these methods from user tasklist manager
+    # warning: only use these methods from user tasklist manager
     @handle_multiple_exception
     def all_tasks(self):
         return self.get(title=DEFAULT_TASKLISTS['all_tasks'])
