@@ -13,6 +13,7 @@ DEFAULT_TASKLISTS = {
     'daily': 'Daily Tasks',
     'done': 'Completed Tasks',
 }
+DEFAULT_TASK_STATUSES = {getter: f'is_{getter}' for getter in DEFAULT_TASKLISTS.keys() if getter != 'all_tasks'}
 
 
 class Task(models.Model):
@@ -73,19 +74,18 @@ class Task(models.Model):
 
 
 @receiver(post_save, sender=Task)
-def add_task_to_default_tasklist(instance, created, **kwargs):
+def add_and_remove_task_of_default_tasklist(instance, created, **kwargs):
     task = instance
-    statuses = list(DEFAULT_TASKLISTS.keys())
-    statuses.pop(statuses.index('all_tasks'))
     if created:
         task.user.tasklists.all_tasks().tasks.add(task)
-    for status in statuses:
-        bound_func = getattr(task.user.tasklists, status, None)
+    for getter, status in DEFAULT_TASK_STATUSES.items():
+        bound_func = getattr(task.user.tasklists, getter, None)
         if callable(bound_func):
             default_tasklist = bound_func()
-            is_status = getattr(task, f'is_{status}', False)
+            is_status = getattr(task, status, False)
             if default_tasklist:
                 if is_status and task not in default_tasklist.tasks.all():
                     default_tasklist.tasks.add(task)
                 elif not is_status and task in default_tasklist.tasks.all():
                     default_tasklist.tasks.remove(task)
+

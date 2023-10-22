@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from rest_framework import status
-from tasks.models import Task, DEFAULT_TASKLISTS
+from tasks.models import Task, DEFAULT_TASKLISTS, DEFAULT_TASK_STATUSES
 from tasks.tests import CustomTestCase, SHOULD_NOT_CONTAIN_TEXT
 from .models import TaskList
 
@@ -36,6 +36,7 @@ class DefaultTaskListTests(TestCase):
         self.user.user_permissions.add(self.default_tasklist_permission)
         response = self.client.get(path)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.client.logout()
 
 
 class TaskListTests(CustomTestCase):
@@ -169,6 +170,52 @@ class TaskListTests(CustomTestCase):
         self.assertEqual(delete_response.status_code, status.HTTP_302_FOUND)
         self.assertRedirects(delete_response, reverse('tasklist-list'))
         self.assertFalse(TaskList.objects.filter(id=self.tasklist.id).exists())
+        self.client.logout()
+
+
+class DefaultTaskListTaskTests(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = get_user_model().objects.create_user(
+            username='testuser',
+            password='testpass123'
+        )
+        cls.default_tasklist_permission = Permission.objects.get(codename='default_tasklist')
+
+    def setUp(self):
+        self.task = Task.objects.create(
+            user=self.user,
+            title='testtask'
+        )
+
+    def test_add_and_remove_task_of_default_tasklist_signal(self):
+        for getter, is_status in DEFAULT_TASK_STATUSES.items():
+            default_tasklist_title = DEFAULT_TASKLISTS[getter]
+            setattr(self.task, is_status, False)
+            self.task.save()
+            setattr(self.task, is_status, True)
+            self.task.save()
+            self.assertTrue(self.task.tasklists.filter(title=default_tasklist_title).exists())
+            setattr(self.task, is_status, False)
+            self.task.save()
+            self.assertFalse(self.task.tasklists.filter(title=default_tasklist_title).exists())
+
+    def test_add_and_remove_task_of_all_tasks(self):
+        self.assertTrue(self.task.tasklists.filter(title=DEFAULT_TASKLISTS['all_tasks']).exists())
+        self.task.delete()
+        self.assertEqual(self.user.tasklists.all_tasks().tasks.count(), 0)
+
+    def test_default_tasklist_task_permission(self):
+        self.client.force_login(self.user)
+        path = reverse('tasklist-task-create', kwargs={'tasklist': 'all-tasks'})
+        # without permission
+        no_response = self.client.get(path)
+        self.assertEqual(no_response.status_code, status.HTTP_403_FORBIDDEN)
+        # with permission
+        self.user.user_permissions.add(self.default_tasklist_permission)
+        response = self.client.get(path)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.client.logout()
 
 
