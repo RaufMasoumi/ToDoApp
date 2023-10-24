@@ -39,7 +39,8 @@ class CustomUserTests(CustomTestCase):
         # absolute url test
         self.assertEqual(self.user.get_absolute_url(), path)
         # bad user test
-        self.login_required_and_user_itself_or_somecode_test(path, self.superuser, status.HTTP_403_FORBIDDEN)
+        self.login_required_and_user_itself_or_somecode_test(path, bad_user=self.superuser,
+                                                             status_code=status.HTTP_403_FORBIDDEN)
         # correct user test
         self.client.force_login(self.user)
         response = self.client.get(path)

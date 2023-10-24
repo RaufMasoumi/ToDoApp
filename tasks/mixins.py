@@ -37,15 +37,16 @@ class ViewBadUserTestsMixin:
         self.assertEqual(no_response.status_code, status.HTTP_302_FOUND)
         self.assertRedirects(no_response, get_redirected_login_url(path))
 
-    def user_itself_or_somecode_test(self, path, bad_user=None, status_code=status.HTTP_404_NOT_FOUND):
+    def user_itself_or_somecode_test(self, path, method='get', bad_user=None, status_code=status.HTTP_404_NOT_FOUND):
         bad_user = bad_user or self.get_bad_user()
+        method = method if method in ['get', 'post', 'put', 'delete', 'patch', 'options', 'trace'] else 'get'
         # with authentication but not user itself
         self.client.force_login(bad_user)
-        no_response = self.client.get(path)
+        no_response = getattr(self.client, method)(path)
         self.assertEqual(no_response.status_code, status_code)
         self.client.logout()
 
-    def user_itself_or_200_but_nothing_exists_test(self, path, bad_user=None, should_not_contain_content=[]):
+    def user_itself_or_200_but_nothing_exists_test(self, path, bad_user=None, should_not_contain_content=tuple()):
         bad_user = bad_user or self.get_bad_user()
         # with authentication but not user itself
         self.client.force_login(bad_user)
@@ -55,11 +56,15 @@ class ViewBadUserTestsMixin:
             self.assertNotContains(no_response, content)
         self.client.logout()
 
-    def login_required_and_user_itself_or_somecode_test(self, path, bad_user=None, status_code=status.HTTP_404_NOT_FOUND):
+    def login_required_and_user_itself_or_somecode_test(
+            self, path, method='get', bad_user=None, status_code=status.HTTP_404_NOT_FOUND
+    ):
         self.login_required_test(path)
-        self.user_itself_or_somecode_test(path, bad_user, status_code)
+        self.user_itself_or_somecode_test(path, method, bad_user, status_code)
 
-    def login_required_and_user_itself_or_nothing_exists_test(self, path, bad_user=None, should_not_contain_content=None):
+    def login_required_and_user_itself_or_nothing_exists_test(
+            self, path, bad_user=None, should_not_contain_content=None
+    ):
         self.login_required_test(path)
         self.user_itself_or_200_but_nothing_exists_test(path, bad_user, should_not_contain_content)
 

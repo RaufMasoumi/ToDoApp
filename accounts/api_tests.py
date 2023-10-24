@@ -25,7 +25,8 @@ class CustomUserApiTests(CustomAPITestCase):
         # absolute api url test
         self.assertEqual(path, reverse('api-user-detail', kwargs={'slug': self.user1.slug}))
         # bad user test
-        self.login_required_and_user_itself_or_somecode_test(path, self.user2, status.HTTP_403_FORBIDDEN)
+        self.login_required_and_user_itself_or_somecode_test(path, bad_user=self.user2,
+                                                             status_code=status.HTTP_403_FORBIDDEN)
         # correct user test
         # admin
         self.client.force_login(self.superuser)
