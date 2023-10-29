@@ -189,7 +189,7 @@ class DefaultTaskListTaskTests(TestCase):
             title='testtask'
         )
 
-    def test_add_and_remove_task_of_default_tasklist_signal(self):
+    def test_add_and_remove_task_of_default_tasklist(self):
         for getter, is_status in DEFAULT_TASK_STATUSES.items():
             default_tasklist_title = DEFAULT_TASKLISTS[getter]
             setattr(self.task, is_status, False)

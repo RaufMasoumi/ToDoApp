@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from tasks.serializers import TaskDetailSerializer
 from .serializers import TaskListListSerializer, TaskListDetailSerializer
 from .mixins import UserTaskListQuerysetMixin, DynamicTaskListTaskQuerysetMixin
-from .views import add_task_to_tasklist, remove_task_from_tasklist
+from tasks.models import add_task_to_tasklist, remove_task_from_tasklist
 from .permissions import DefaultTaskListPermission, TaskDefaultTaskListPermission
 
 

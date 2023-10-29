@@ -1,9 +1,9 @@
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.http import HttpResponseRedirect
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from tasks.views import TaskUpdateView, TASK_FIELDS
 from tasks.mixins import AllauthLoginRequiredMixin
-from tasks.models import Task
+from tasks.models import Task, add_task_to_tasklist, remove_task_from_tasklist
 from .mixins import UserTaskListQuerysetMixin, DynamicTaskListTaskQuerysetMixin
 from .permissions import DefaultTaskListPermissionMixin
 from .models import TaskList
@@ -88,17 +88,3 @@ class TaskListTaskDeleteView(AllauthLoginRequiredMixin, DefaultTaskListPermissio
         context = super().get_context_data(**kwargs)
         context['tasklist'] = self.get_tasklist()
         return context
-
-
-def add_task_to_tasklist(tasklist, task):
-    if task not in tasklist.tasks.all():
-        tasklist.tasks.add(task)
-        tasklist.save()
-    return tasklist
-
-
-def remove_task_from_tasklist(tasklist, task):
-    if task in tasklist.tasks.all():
-        tasklist.tasks.remove(task)
-        tasklist.save()
-    return tasklist
