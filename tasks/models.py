@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.urls import reverse
 import uuid
 
@@ -60,37 +62,37 @@ class Task(models.Model):
         return short_title
 
     def save(
-        self, force_insert=False, force_update=False, using=None, update_fields=None
+            self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
 
-        # checking if the object is created
-        if self._state.adding:
-            add_task_to_tasklist(self.user.tasklists.all_tasks(), self)
-        for getter, is_status in DEFAULT_TASK_STATUSES.items():
-            status = getattr(self, is_status, None)
-            private_is_status = f'_Task__{is_status}'
-            private_status = getattr(self, private_is_status, None)
-            bound_func = getattr(self.user.tasklists, getter)
-            if callable(bound_func):
-                default_tasklist = bound_func()
-                if private_status != status:
-                    if status:
-                        add_task_to_tasklist(default_tasklist, self)
-                        if is_status == 'is_done':
-                            self.done_at = timezone.now()
-                    else:
-                        remove_task_from_tasklist(default_tasklist, self)
-                        if is_status == 'is_done':
-                            self.done_at = None
-                    setattr(self, private_is_status, status)
-
-                # if when creating, status has been set true
-                elif private_status == status and private_is_status:
-                    add_task_to_tasklist(default_tasklist, self)
-                    if is_status == 'is_done' and self not in default_tasklist.tasks.all():
-                        self.done_at = timezone.now()
+        if self.__is_done != self.is_done:
+            if self.is_done:
+                self.done_at = timezone.now()
+            else:
+                self.done_at = None
+            self.__is_done = self.is_done
+        elif self.__is_done == self.is_done and self.__is_done:
+            if not self.done_at:
+                self.done_at = timezone.now()
 
         return super().save(force_insert, force_update, using, update_fields)
+
+
+@receiver(post_save, sender=Task)
+def add_and_remove_task_of_default_tasklist(instance, created, **kwargs):
+    task = instance
+    if created:
+        task.user.tasklists.all_tasks().tasks.add(task)
+    for getter, status in DEFAULT_TASK_STATUSES.items():
+        bound_func = getattr(task.user.tasklists, getter, None)
+        if callable(bound_func):
+            default_tasklist = bound_func()
+            is_status = getattr(task, status, False)
+            if default_tasklist:
+                if is_status:
+                    add_task_to_tasklist(default_tasklist, task)
+                else:
+                    remove_task_from_tasklist(default_tasklist, task)
 
 
 def add_task_to_tasklist(tasklist, task):
