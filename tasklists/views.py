@@ -7,6 +7,7 @@ from tasks.models import Task, add_task_to_tasklist, remove_task_from_tasklist
 from .mixins import UserTaskListQuerysetMixin, DynamicTaskListTaskQuerysetMixin
 from .permissions import DefaultTaskListPermissionMixin
 from .models import TaskList
+from .forms import TaskListModelForm
 # Create your views here.
 
 
@@ -22,7 +23,12 @@ class TaskListDetailView(AllauthLoginRequiredMixin, UserTaskListQuerysetMixin, D
 class TaskListCreateView(AllauthLoginRequiredMixin, CreateView):
     model = TaskList
     template_name = 'tasklists/tasklist_create.html'
-    fields = ('title', 'tasks')
+    form_class = TaskListModelForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
 
     def form_valid(self, form):
         form.instance.user = self.request.user
@@ -31,7 +37,12 @@ class TaskListCreateView(AllauthLoginRequiredMixin, CreateView):
 
 class TaskListUpdateView(AllauthLoginRequiredMixin, DefaultTaskListPermissionMixin, UserTaskListQuerysetMixin, UpdateView):
     template_name = 'tasklists/tasklist_update.html'
-    fields = ('title', 'tasks')
+    form_class = TaskListModelForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
 
 
 class TaskListDeleteView(AllauthLoginRequiredMixin, DefaultTaskListPermissionMixin, UserTaskListQuerysetMixin, DeleteView):

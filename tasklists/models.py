@@ -75,20 +75,10 @@ class TaskList(models.Model):
     def get_absolute_delete_url(self):
         return reverse('tasklist-delete', kwargs={'slug': self.slug})
 
-    def clean_title(self):
-        if self.user.tasklists.filter(title=self.title).exists():
-            raise ValidationError('TaskList title should be unique!', code='invalid')
-
-    def clean_tasks(self):
-        if self.tasks.exclude(user=self.user).exists():
-            raise ValidationError('There should not be the tasks that are not for user in user\'s task list!',
-                                  code='invalid')
-
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
-        if not self.slug:
-            self.slug = slugify(self.title)
+        self.slug = slugify(self.title)
         return super().save(force_insert, force_update, using, update_fields)
 
 
@@ -104,12 +94,6 @@ class TaskListTaskPriority(models.Model):
 
     def __str__(self):
         return f'\'{self.task.get_short_title()}\' priority in \'{self.list}\''
-    #
-    # def save(
-    #     self, force_insert=False, force_update=False, using=None, update_fields=None
-    # ):
-    #     if not ListTaskPriority.objects.filter(pk=self.pk).exists():
-    #         self.number = 1
 
 
 def update_task_number(task_p: TaskListTaskPriority, new_number: int):
