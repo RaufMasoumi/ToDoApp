@@ -1,9 +1,10 @@
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
-from tasks.views import TaskUpdateView, TASK_FIELDS
+from tasks.views import TaskUpdateView
 from tasks.mixins import AllauthLoginRequiredMixin
 from tasks.models import Task, add_task_to_tasklist, remove_task_from_tasklist
+from tasks.forms import TaskModelForm
 from .mixins import UserTaskListQuerysetMixin, DynamicTaskListTaskQuerysetMixin
 from .permissions import DefaultTaskListPermissionMixin
 from .models import TaskList
@@ -53,9 +54,8 @@ class TaskListDeleteView(AllauthLoginRequiredMixin, DefaultTaskListPermissionMix
 
 
 class TaskListTaskCreateView(AllauthLoginRequiredMixin, DefaultTaskListPermissionMixin, CreateView):
-    model = Task
     template_name = 'tasks/task_create.html'
-    fields = TASK_FIELDS
+    form_class = TaskModelForm
 
     def get_object(self, queryset=None):
         mixin = UserTaskListQuerysetMixin(self.request)
@@ -82,8 +82,7 @@ class TaskListTaskUpdateView(TaskUpdateView):
         except TaskList.DoesNotExist:
             return super().get_success_url()
         else:
-            success_url = tasklist.get_absolute_url()
-            return success_url
+            return tasklist.get_absolute_url()
 
 
 class TaskListTaskDeleteView(AllauthLoginRequiredMixin, DefaultTaskListPermissionMixin, DynamicTaskListTaskQuerysetMixin, DeleteView):
@@ -94,8 +93,8 @@ class TaskListTaskDeleteView(AllauthLoginRequiredMixin, DefaultTaskListPermissio
         return self.get_tasklist().get_absolute_url()
 
     def form_valid(self, form=None):
-        tasklist = remove_task_from_tasklist(self.get_tasklist(), self.get_object())
-        return HttpResponseRedirect(tasklist.get_absolute_url())
+        remove_task_from_tasklist(self.get_tasklist(), self.get_object())
+        return HttpResponseRedirect(self.get_success_url())
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

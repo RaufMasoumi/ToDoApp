@@ -1,9 +1,8 @@
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from .mixins import AllauthLoginRequiredMixin, UserTaskQuerysetMixin
-from .models import Task
+from .forms import TaskModelForm
 # Create your views here.
-TASK_FIELDS = ('title', 'due_date', 'is_daily', 'is_important', 'is_not_important', 'is_timely_important', 'is_done')
 
 
 class TaskListView(AllauthLoginRequiredMixin, UserTaskQuerysetMixin, ListView):
@@ -15,8 +14,7 @@ class TaskDetailView(AllauthLoginRequiredMixin, UserTaskQuerysetMixin, DetailVie
 
 
 class TaskCreateView(AllauthLoginRequiredMixin, CreateView):
-    model = Task
-    fields = TASK_FIELDS
+    form_class = TaskModelForm
     template_name = 'tasks/task_create.html'
 
     def form_valid(self, form):
@@ -25,7 +23,7 @@ class TaskCreateView(AllauthLoginRequiredMixin, CreateView):
 
 
 class TaskUpdateView(AllauthLoginRequiredMixin, UserTaskQuerysetMixin, UpdateView):
-    fields = TASK_FIELDS
+    form_class = TaskModelForm
     template_name = 'tasks/task_update.html'
 
 
