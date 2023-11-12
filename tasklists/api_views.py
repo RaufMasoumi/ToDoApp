@@ -10,6 +10,12 @@ from .permissions import DefaultTaskListPermission, TaskDefaultTaskListPermissio
 class TaskListLCApiView(UserTaskListQuerysetMixin, ListCreateAPIView):
     serializer_class = TaskListListSerializer
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        context['instance_user'] = self.request.user
+        return context
+
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
@@ -18,6 +24,11 @@ class TaskListRUDApiView(UserTaskListQuerysetMixin, RetrieveUpdateDestroyAPIView
     lookup_field = 'slug'
     serializer_class = TaskListDetailSerializer
     permission_classes = [IsAuthenticated, DefaultTaskListPermission]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
 
 
 class TaskListTaskLCApiView(DynamicTaskListTaskQuerysetMixin, ListCreateAPIView):
