@@ -28,10 +28,14 @@ class TaskDetailSerializer(serializers.HyperlinkedModelSerializer):
 
     def update(self, instance, validated_data):
         validated_data, tasklists = get_tasklists_from_data(validated_data)
-        task = super().update(instance, validated_data)
-        task.tasklists.set(tasklists)
-        task.save()
-        return task
+        instance.tasklists.set(tasklists)
+        return super().update(instance, validated_data)
+
+    def validate(self, data):
+        data = super().validate(data)
+        if data['is_important']:
+            data['is_not_important'] = False
+        return data
 
 
 def get_tasklists_from_data(validated_data: dict):
@@ -40,4 +44,5 @@ def get_tasklists_from_data(validated_data: dict):
         tasklists_data = validated_data.pop('tasklists')
         tasklists_pk = [tasklist_data.get('pk') for tasklist_data in tasklists_data]
         tasklists = TaskList.objects.filter(pk__in=tasklists_pk)
+        tasklists = tasklists.filter(user=validated_data['user'])
     return validated_data, tasklists
