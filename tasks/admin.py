@@ -9,7 +9,7 @@ def short_title(task: Task):
 
 
 class TaskAdmin(admin.ModelAdmin):
-    list_display = [short_title, 'due_date', 'is_done']
+    list_display = [short_title, 'due_date', 'is_done', 'user']
 
 
 admin.site.register(Task, TaskAdmin)
