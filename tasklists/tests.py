@@ -313,9 +313,45 @@ class TaskListTaskTests(CustomTestCase):
         self.client.logout()
 
 
+class TaskListValidationTests(CustomTestCase):
+    def setUp(self):
+        self.tasklist = TaskList.objects.create(
+            user=self.user,
+            title='testtasklist',
+        )
+        self.task = Task.objects.create(
+            user=self.user,
+            title='testtask'
+        )
+        self.bad_user_task = Task.objects.create(
+            user=self.bad_user,
+            title='testtask2'
+        )
 
+    def test_tasklist_title_validation(self, create_path=None, update_path=None):
+        self.client.force_login(self.user)
+        create_path = create_path if create_path else reverse('tasklist-create')
+        data = {'title': 'testtasklist'}
+        should_be_title = f'{self.tasklist.title}(1)'
+        self.client.post(create_path, data)
+        tasklist = TaskList.objects.order_by('-created_at').first()
+        self.assertNotEqual(tasklist.title, data['title'])
+        self.assertEqual(tasklist.title, should_be_title)
+        update_path = update_path if update_path else tasklist.get_absolute_update_url()
+        self.client.post(update_path, data)
+        tasklist.refresh_from_db()
+        self.assertEqual(tasklist.title, should_be_title)
+        self.client.logout()
 
-
-
-
-
+    def test_tasklist_tasks_validation(self):
+        self.client.force_login(self.user)
+        path = self.tasklist.get_absolute_update_url()
+        data = {
+            'title': self.tasklist.title,
+            'tasks': [self.task.pk, self.bad_user_task.pk]
+        }
+        self.client.post(path, data)
+        self.assertEqual(self.tasklist.tasks.count(), 1)
+        self.assertTrue(self.tasklist.tasks.filter(pk=self.task.pk).exists())
+        self.assertFalse(self.tasklist.tasks.filter(pk=self.bad_user_task.pk).exists())
+        self.client.logout()

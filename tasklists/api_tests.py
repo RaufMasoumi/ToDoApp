@@ -7,6 +7,7 @@ from tasks.api_tests import CustomAPITestCase
 from tasks.tests import SHOULD_NOT_CONTAIN_TEXT
 from tasks.models import Task
 from .models import TaskList
+from .tests import TaskListValidationTests
 
 
 class DefaultTaskListAPITests(APITestCase):
@@ -168,3 +169,13 @@ class TaskListTaskAPITests(CustomAPITestCase):
         self.assertEqual(self.tasklist.tasks.count(), 0)
         self.assertTrue(Task.objects.filter(pk=self.task.pk).exists())
         self.client.logout()
+
+
+class TaskListValidationAPITests(TaskListValidationTests):
+    def test_tasklist_title_validation(self, create_path=None, update_path=None):
+        create_path = reverse('api-tasklist-list')
+        update_path = self.tasklist.get_absolute_api_url()
+        return super().test_tasklist_title_validation(create_path, update_path)
+
+    def test_tasklist_tasks_validation(self):
+        pass

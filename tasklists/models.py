@@ -75,6 +75,9 @@ class TaskList(models.Model):
     def get_absolute_delete_url(self):
         return reverse('tasklist-delete', kwargs={'slug': self.slug})
 
+    def get_absolute_api_url(self):
+        return reverse('api-tasklist-detail', kwargs={'slug': self.slug})
+
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
