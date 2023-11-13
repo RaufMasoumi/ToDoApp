@@ -64,7 +64,6 @@ class Task(models.Model):
     def save(
             self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
-        self.clean()
         if self.__is_done != self.is_done:
             if self.is_done:
                 self.done_at = timezone.now()
@@ -76,10 +75,6 @@ class Task(models.Model):
                 self.done_at = timezone.now()
 
         return super().save(force_insert, force_update, using, update_fields)
-
-    def clean(self):
-        super().clean()
-        self.tasklists.set(self.tasklists.filter(user=self.user))
 
 
 @receiver(post_save, sender=Task)

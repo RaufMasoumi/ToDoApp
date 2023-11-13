@@ -78,13 +78,8 @@ class TaskList(models.Model):
     def save(
         self, force_insert=False, force_update=False, using=None, update_fields=None
     ):
-        self.clean()
         self.slug = slugify(self.title)
         return super().save(force_insert, force_update, using, update_fields)
-
-    def clean(self):
-        super().clean()
-        self.tasks.set(self.tasks.filter(user=self.user))
 
 
 class TaskListTaskPriority(models.Model):
