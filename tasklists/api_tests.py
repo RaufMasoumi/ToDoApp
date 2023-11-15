@@ -172,10 +172,10 @@ class TaskListTaskAPITests(CustomAPITestCase):
 
 
 class TaskListValidationAPITests(TaskListValidationTests):
-    def test_tasklist_title_validation(self, create_path=None, update_path=None):
+    def test_tasklist_title_validation(self, create_path=None, update_path=None, update_method='put'):
         create_path = reverse('api-tasklist-list')
         update_path = self.tasklist.get_absolute_api_url()
-        return super().test_tasklist_title_validation(create_path, update_path)
+        return super().test_tasklist_title_validation(create_path, update_path, update_method)
 
     def test_tasklist_tasks_validation(self):
         pass

@@ -6,6 +6,7 @@ from django.contrib.auth.models import Permission
 from rest_framework import status
 from tasks.models import Task, DEFAULT_TASKLISTS, DEFAULT_TASK_STATUSES
 from tasks.tests import CustomTestCase, SHOULD_NOT_CONTAIN_TEXT
+from tasks.mixins import TestUserSetUpMixin
 from .models import TaskList
 
 # Create your tests here.
@@ -313,7 +314,7 @@ class TaskListTaskTests(CustomTestCase):
         self.client.logout()
 
 
-class TaskListValidationTests(CustomTestCase):
+class TaskListValidationTests(TestUserSetUpMixin, TestCase):
     def setUp(self):
         self.tasklist = TaskList.objects.create(
             user=self.user,
@@ -328,7 +329,7 @@ class TaskListValidationTests(CustomTestCase):
             title='testtask2'
         )
 
-    def test_tasklist_title_validation(self, create_path=None, update_path=None):
+    def test_tasklist_title_validation(self, create_path=None, update_path=None, update_method='post'):
         self.client.force_login(self.user)
         create_path = create_path if create_path else reverse('tasklist-create')
         data = {'title': 'testtasklist'}
@@ -338,7 +339,7 @@ class TaskListValidationTests(CustomTestCase):
         self.assertNotEqual(tasklist.title, data['title'])
         self.assertEqual(tasklist.title, should_be_title)
         update_path = update_path if update_path else tasklist.get_absolute_update_url()
-        self.client.post(update_path, data)
+        getattr(self.client, update_method)(update_path, data)
         tasklist.refresh_from_db()
         self.assertEqual(tasklist.title, should_be_title)
         self.client.logout()

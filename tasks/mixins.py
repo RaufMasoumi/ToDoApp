@@ -15,8 +15,7 @@ class UserTaskQuerysetMixin:
         return self.request.user.tasks.all()
 
 
-class ViewBadUserTestsMixin:
-
+class TestUserSetUpMixin:
     @classmethod
     def setUpTestData(cls):
         cls.user = get_user_model().objects.create_user(
@@ -30,6 +29,9 @@ class ViewBadUserTestsMixin:
 
     def get_bad_user(self):
         return getattr(self, 'bad_user', None)
+
+
+class ViewBadUserTestsMixin(TestUserSetUpMixin):
 
     def login_required_test(self, path):
         # without authentication

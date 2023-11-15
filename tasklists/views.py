@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
 from tasks.views import TaskUpdateView
 from tasks.mixins import AllauthLoginRequiredMixin
-from tasks.models import Task, add_task_to_tasklist, remove_task_from_tasklist
+from tasks.models import add_task_to_tasklist, remove_task_from_tasklist
 from tasks.forms import TaskModelForm
 from .mixins import UserTaskListQuerysetMixin, DynamicTaskListTaskQuerysetMixin
 from .permissions import DefaultTaskListPermissionMixin
