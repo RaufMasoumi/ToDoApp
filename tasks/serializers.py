@@ -1,4 +1,3 @@
-from django.db.models import QuerySet
 from rest_framework import serializers
 from tasklists.nested_serializers import TaskListNestedSerializer
 from tasklists.models import TaskList
@@ -27,22 +26,24 @@ class TaskDetailSerializer(serializers.HyperlinkedModelSerializer):
         return task
 
     def update(self, instance, validated_data):
-        validated_data, tasklists = get_tasklists_from_data(validated_data)
-        instance.tasklists.set(tasklists)
-        return super().update(instance, validated_data)
+        validated_data, tasklists = get_tasklists_from_data(validated_data, instance)
+        task = super().update(instance, validated_data)
+        task.tasklists.set(tasklists)
+        task.save()
+        return task
 
     def validate(self, data):
         data = super().validate(data)
-        if data['is_important']:
+        if data.get('is_important', None):
             data['is_not_important'] = False
         return data
 
 
-def get_tasklists_from_data(validated_data: dict):
+def get_tasklists_from_data(validated_data: dict, instance=None):
     tasklists = TaskList.objects.none()
     if validated_data.get('tasklists', None):
+        user = instance.user if instance else validated_data.get('user', None)
         tasklists_data = validated_data.pop('tasklists')
         tasklists_pk = [tasklist_data.get('pk') for tasklist_data in tasklists_data]
-        tasklists = TaskList.objects.filter(pk__in=tasklists_pk)
-        tasklists = tasklists.filter(user=validated_data['user'])
+        tasklists = TaskList.objects.filter(pk__in=tasklists_pk, user=user)
     return validated_data, tasklists

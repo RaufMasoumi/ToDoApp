@@ -54,6 +54,9 @@ class Task(models.Model):
     def get_absolute_delete_url(self):
         return reverse('task-delete', kwargs={'pk': self.pk})
 
+    def get_absolute_api_url(self):
+        return reverse('api-task-detail', kwargs={'pk': self.pk})
+
     def get_short_title(self):
         if len(self.title) >= 30:
             short_title = self.title[:30] + ' ...'

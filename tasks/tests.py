@@ -1,7 +1,8 @@
 from django.shortcuts import reverse
 from django.test import TestCase
+from django.contrib.auth import get_user_model
 from rest_framework import status
-from .mixins import ViewBadUserTestsMixin
+from .mixins import TestUserSetUpMixin, ViewBadUserTestsMixin
 from .models import Task
 # Create your tests here.
 
@@ -109,3 +110,20 @@ class TaskTests(CustomTestCase):
         self.client.logout()
 
 
+class TaskValidationTests(TestUserSetUpMixin, TestCase):
+
+    def setUp(self):
+        self.task = Task.objects.create(
+            user=self.user,
+            title='testtask'
+        )
+
+    def test_task_status_validation(self, update_path=None, update_method='post'):
+        self.client.force_login(self.user)
+        update_path = update_path if update_path else self.task.get_absolute_update_url()
+        data = {'title': self.task.title, 'is_important': True, 'is_not_important': True}
+        getattr(self.client, update_method)(update_path, data)
+        self.task.refresh_from_db()
+        self.assertTrue(self.task.is_important)
+        self.assertFalse(self.task.is_not_important)
+        self.client.logout()
