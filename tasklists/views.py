@@ -9,12 +9,18 @@ from .mixins import UserTaskListQuerysetMixin, DynamicTaskListTaskQuerysetMixin
 from .permissions import DefaultTaskListPermissionMixin
 from .models import TaskList
 from .forms import TaskListModelForm
+from .filters import TaskListFilterSet
 # Create your views here.
 
 
 class TaskListListView(AllauthLoginRequiredMixin, UserTaskListQuerysetMixin, ListView):
     context_object_name = 'tasklists'
     template_name = 'tasklists/tasklist_list.html'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(object_list=object_list, **kwargs)
+        context['filter'] = TaskListFilterSet(self.request.GET, self.get_queryset())
+        return context
 
 
 class TaskListDetailView(AllauthLoginRequiredMixin, UserTaskListQuerysetMixin, DetailView):

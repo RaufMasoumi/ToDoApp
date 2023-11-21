@@ -1,12 +1,18 @@
 {% extends '_base.html' %}
+{% load crispy_forms_tags %}
 {% block content %}
 
-{% for list in tasklists %}
+{% for list in filter.qs %}
     <h1><a href="{{ list.get_absolute_url }}">{{ list.title }}</a></h1>
     <h3>{{ list.tasks.count }} tasks</h3>
     <hr>
 {% endfor %}
 
     <h3><a href="{% url 'tasklist-create' %}">Create a new task list</a></h3>
-
+    <hr>
+    <h3>Filtering</h3>
+    <form method="get">
+    {{ filter.form | crispy }}
+    <button type="submit" class="btn btn-success">Filter</button>
+</form>
 {% endblock %}
