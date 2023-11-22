@@ -22,8 +22,8 @@ class TaskListFilterSet(FilterSet):
 TASKLIST_FILTERSETS_LIST = [TaskListFilterSet, ]
 FILTERSETS_LIST = TASKLIST_FILTERSETS_LIST + TASK_FILTERSETS_LIST
 
-ALL_FILTERSETS_FIELD_NAMES = []
+ALL_FILTERSETS_FIELD_NAMES = set()
 for filterset in FILTERSETS_LIST:
     for field_name, lookup_exprs in filterset.get_fields().items():
         for lookup_expr in lookup_exprs:
-            ALL_FILTERSETS_FIELD_NAMES.append(filterset.get_filter_name(field_name, lookup_expr))
+            ALL_FILTERSETS_FIELD_NAMES.add(filterset.get_filter_name(field_name, lookup_expr))
