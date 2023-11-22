@@ -71,9 +71,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # Third party
-    "allauth.account.middleware.AccountMiddleware",
+    'allauth.account.middleware.AccountMiddleware',
     # Local
-    "tasklists.middlewares.DjangoFiltersMiddleware",
+    'tasklists.middlewares.DjangoFiltersMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'

@@ -2,11 +2,17 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.urls import reverse_lazy
 from .mixins import AllauthLoginRequiredMixin, UserTaskQuerysetMixin
 from .forms import TaskModelForm
+from .filters import TaskFilterSet
 # Create your views here.
 
 
 class TaskListView(AllauthLoginRequiredMixin, UserTaskQuerysetMixin, ListView):
     template_name = 'tasks/task_list.html'
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter'] = TaskFilterSet(self.request.GET, self.get_queryset())
+        return context
 
 
 class TaskDetailView(AllauthLoginRequiredMixin, UserTaskQuerysetMixin, DetailView):

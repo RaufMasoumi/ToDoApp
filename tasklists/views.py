@@ -5,6 +5,7 @@ from tasks.views import TaskUpdateView
 from tasks.mixins import AllauthLoginRequiredMixin
 from tasks.models import add_task_to_tasklist, remove_task_from_tasklist
 from tasks.forms import TaskModelForm
+from tasks.filters import TaskFilterSet
 from .mixins import UserTaskListQuerysetMixin, DynamicTaskListTaskQuerysetMixin
 from .permissions import DefaultTaskListPermissionMixin
 from .models import TaskList
@@ -25,6 +26,11 @@ class TaskListListView(AllauthLoginRequiredMixin, UserTaskListQuerysetMixin, Lis
 
 class TaskListDetailView(AllauthLoginRequiredMixin, UserTaskListQuerysetMixin, DetailView):
     template_name = 'tasklists/tasklist_detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['task_filter'] = TaskFilterSet(self.request.GET, self.get_object().tasks.all())
+        return context
 
 
 class TaskListCreateView(AllauthLoginRequiredMixin, CreateView):
