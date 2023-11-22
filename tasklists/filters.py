@@ -16,3 +16,12 @@ class TaskListFilterSet(FilterSet):
     def qs(self):
         parent = super().qs
         return parent.distinct()
+
+
+FILTERSETS_LIST = [TaskListFilterSet, ]
+
+ALL_FILTERSETS_FIELD_NAMES = []
+for filterset in FILTERSETS_LIST:
+    for field_name, lookup_exprs in filterset.get_fields().items():
+        for lookup_expr in lookup_exprs:
+            ALL_FILTERSETS_FIELD_NAMES.append(filterset.get_filter_name(field_name, lookup_expr))
