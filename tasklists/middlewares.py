@@ -16,7 +16,7 @@ class DjangoFiltersMiddleware:
         if new_get == request.GET:
             return self.get_response(request)
         request.GET = new_get
-        pure_path = request.META.get('HTTP_REFERER').split('?')[0]
+        pure_path = request.META.get('PATH_INFO')
         new_path = f'{pure_path}?' + '&'.join(['%s=%s' % (k, v.replace(' ', '+')) for k, v in new_get.items()])
         if len(request.GET) == 0:
             new_path = new_path.split('?')[0]

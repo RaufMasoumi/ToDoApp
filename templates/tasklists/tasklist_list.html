@@ -2,6 +2,8 @@
 {% load crispy_forms_tags %}
 {% block content %}
 
+{% include 'tasklists/search.html' %}
+    <hr>
 {% for list in filter.qs %}
     <h1><a href="{{ list.get_absolute_url }}">{{ list.title }}</a></h1>
     <h3>{{ list.tasks.count }} tasks</h3>
@@ -12,7 +14,13 @@
     <hr>
     <h3>Filtering</h3>
     <form method="get">
-    {{ filter.form | crispy }}
-    <button type="submit" class="btn btn-success">Filter</button>
-</form>
+        {{ filter.form | crispy }}
+        <button type="submit" class="btn btn-success">Filter</button>
+    </form>
+    <hr>
+    <h3>Ordering</h3>
+    <form method="get">
+        {{ ordering_form | crispy }}
+        <button type="submit" class="btn btn-success">Filter</button>
+    </form>
 {% endblock %}

@@ -1,6 +1,7 @@
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
+from rest_framework.filters import SearchFilter
 from tasks.views import TaskUpdateView
 from tasks.mixins import AllauthLoginRequiredMixin
 from tasks.models import add_task_to_tasklist, remove_task_from_tasklist
@@ -9,7 +10,7 @@ from tasks.filters import TaskFilterSet
 from .mixins import UserTaskListQuerysetMixin, DynamicTaskListTaskQuerysetMixin
 from .permissions import DefaultTaskListPermissionMixin
 from .models import TaskList
-from .forms import TaskListModelForm
+from .forms import TaskListModelForm, TaskListOrderingForm
 from .filters import TaskListFilterSet
 # Create your views here.
 
@@ -17,11 +18,27 @@ from .filters import TaskListFilterSet
 class TaskListListView(AllauthLoginRequiredMixin, UserTaskListQuerysetMixin, ListView):
     context_object_name = 'tasklists'
     template_name = 'tasklists/tasklist_list.html'
+    search_fields = ['title', ]
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(object_list=object_list, **kwargs)
-        context['filter'] = TaskListFilterSet(self.request.GET, self.get_queryset())
+        queryset = self.get_queryset()
+        ordering = self.get_ordering()
+        if ordering:
+            queryset = queryset.order_by(ordering)
+        self.request.query_params = self.request.GET
+        search_filter = SearchFilter()
+        queryset = search_filter.filter_queryset(self.request, queryset, self)
+        context['filter'] = TaskListFilterSet(self.request.GET, queryset)
+        context['term'] = ' '.join(search_filter.get_search_terms(self.request))
+        context['ordering_form'] = TaskListOrderingForm(self.request.GET)
         return context
+
+    def get_ordering(self):
+        ordering_form = TaskListOrderingForm(self.request.GET)
+        if ordering_form.is_valid():
+            return ordering_form.cleaned_data['ordering']
+        return None
 
 
 class TaskListDetailView(AllauthLoginRequiredMixin, UserTaskListQuerysetMixin, DetailView):
