@@ -2,6 +2,9 @@ from django import forms
 from django.forms import ModelForm
 from .models import Task
 
+TASK_SEARCH_FIELDS = ['title', ]
+TASK_ORDERING_FIELDS = ['title', 'due_date', 'is_done', 'is_important', 'created_at', 'updated_at', 'done_at']
+
 
 class TaskModelForm(ModelForm):
     class Meta:
@@ -31,7 +34,7 @@ def get_ordering_choices(ordering_fields):
 
 
 class TaskOrderingForm(forms.Form):
-    ordering_fields = ['title', 'due_date', 'is_important', 'created_at', 'updated_at']
+    ordering_fields = TASK_ORDERING_FIELDS
     ORDERING_CHOICES = get_ordering_choices(ordering_fields)
     ordering = forms.ChoiceField(choices=ORDERING_CHOICES, required=False)
 

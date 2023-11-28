@@ -9,13 +9,14 @@ from .serializers import TaskListListSerializer, TaskListDetailSerializer
 from .mixins import UserTaskListQuerysetMixin, DynamicTaskListTaskQuerysetMixin
 from .permissions import DefaultTaskListPermission, TaskDefaultTaskListPermission
 from .filters import TaskListFilterSet
+from .forms import TASKLIST_SEARCH_FIELDS, TASKLIST_ORDERING_FIELDS
 
 
 class TaskListLCApiView(UserTaskListQuerysetMixin, ListCreateAPIView):
     serializer_class = TaskListListSerializer
     filter_backends = [SearchFilter, OrderingFilter, DjangoFilterBackend]
-    search_fields = ['title', ]
-    ordering_fields = ['title', 'created_at', 'updated_at']
+    search_fields = TASKLIST_SEARCH_FIELDS
+    ordering_fields = TASKLIST_ORDERING_FIELDS
     filterset_class = TaskListFilterSet
 
     def get_serializer_context(self):

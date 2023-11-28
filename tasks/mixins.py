@@ -71,5 +71,19 @@ class ViewBadUserTestsMixin(TestUserSetUpMixin):
         self.user_itself_or_200_but_nothing_exists_test(path, bad_user, should_not_contain_content)
 
 
+# SOF stands for Searching, Ordering, Filtering
+class ViewSOFMixin:
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(object_list=object_list, **kwargs)
+        queryset = self.get_queryset()
+        self.request.query_params = self.request.GET
+        queryset = self.ordering_filter_class().filter_queryset(self.request, queryset, self)
+        queryset = self.search_filter_class().filter_queryset(self.request, queryset, self)
+        context['filter'] = self.filterset_class(self.request.GET, queryset)
+        context['search_form'] = self.search_form(self.request.GET)
+        context['ordering_form'] = self.ordering_form(self.request.GET)
+        return context
+
+
 def get_redirected_login_url(coming_from):
     return reverse('account_login') + f'?next={coming_from}'

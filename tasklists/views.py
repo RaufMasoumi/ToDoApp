@@ -1,44 +1,30 @@
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.http import HttpResponseRedirect
 from django.urls import reverse_lazy
-from rest_framework.filters import SearchFilter
+from rest_framework.filters import SearchFilter, OrderingFilter
 from tasks.views import TaskUpdateView
-from tasks.mixins import AllauthLoginRequiredMixin
+from tasks.mixins import AllauthLoginRequiredMixin, ViewSOFMixin
 from tasks.models import add_task_to_tasklist, remove_task_from_tasklist
 from tasks.forms import TaskModelForm, SearchForm
 from tasks.filters import TaskFilterSet
 from .mixins import UserTaskListQuerysetMixin, DynamicTaskListTaskQuerysetMixin
 from .permissions import DefaultTaskListPermissionMixin
 from .models import TaskList
-from .forms import TaskListModelForm, TaskListOrderingForm
+from .forms import TaskListModelForm, TaskListOrderingForm, TASKLIST_SEARCH_FIELDS
 from .filters import TaskListFilterSet
 # Create your views here.
 
 
-class TaskListListView(AllauthLoginRequiredMixin, UserTaskListQuerysetMixin, ListView):
+class TaskListListView(AllauthLoginRequiredMixin, UserTaskListQuerysetMixin, ViewSOFMixin, ListView):
     context_object_name = 'tasklists'
     template_name = 'tasklists/tasklist_list.html'
-    search_fields = ['title', ]
-
-    def get_context_data(self, *, object_list=None, **kwargs):
-        context = super().get_context_data(object_list=object_list, **kwargs)
-        queryset = self.get_queryset()
-        ordering = self.get_ordering()
-        if ordering:
-            queryset = queryset.order_by(ordering)
-        self.request.query_params = self.request.GET
-        search_filter = SearchFilter()
-        queryset = search_filter.filter_queryset(self.request, queryset, self)
-        context['filter'] = TaskListFilterSet(self.request.GET, queryset)
-        context['search_form'] = SearchForm(self.request.GET)
-        context['ordering_form'] = TaskListOrderingForm(self.request.GET)
-        return context
-
-    def get_ordering(self):
-        ordering_form = TaskListOrderingForm(self.request.GET)
-        if ordering_form.is_valid():
-            return ordering_form.cleaned_data['ordering']
-        return None
+    search_form = SearchForm
+    search_filter_class = SearchFilter
+    search_fields = TASKLIST_SEARCH_FIELDS
+    ordering_form = TaskListOrderingForm
+    ordering_filter_class = OrderingFilter
+    ordering_fields = ordering_form.ordering_fields
+    filterset_class = TaskListFilterSet
 
 
 class TaskListDetailView(AllauthLoginRequiredMixin, UserTaskListQuerysetMixin, DetailView):
