@@ -5,7 +5,7 @@ from rest_framework.filters import SearchFilter
 from tasks.views import TaskUpdateView
 from tasks.mixins import AllauthLoginRequiredMixin
 from tasks.models import add_task_to_tasklist, remove_task_from_tasklist
-from tasks.forms import TaskModelForm
+from tasks.forms import TaskModelForm, SearchForm
 from tasks.filters import TaskFilterSet
 from .mixins import UserTaskListQuerysetMixin, DynamicTaskListTaskQuerysetMixin
 from .permissions import DefaultTaskListPermissionMixin
@@ -30,7 +30,7 @@ class TaskListListView(AllauthLoginRequiredMixin, UserTaskListQuerysetMixin, Lis
         search_filter = SearchFilter()
         queryset = search_filter.filter_queryset(self.request, queryset, self)
         context['filter'] = TaskListFilterSet(self.request.GET, queryset)
-        context['term'] = ' '.join(search_filter.get_search_terms(self.request))
+        context['search_form'] = SearchForm(self.request.GET)
         context['ordering_form'] = TaskListOrderingForm(self.request.GET)
         return context
 

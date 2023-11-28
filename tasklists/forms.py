@@ -1,5 +1,6 @@
 from django import forms
 from django.utils.text import slugify
+from tasks.forms import get_ordering_choices
 from .models import TaskList
 
 
@@ -35,11 +36,7 @@ class TaskListModelForm(forms.ModelForm):
 
 class TaskListOrderingForm(forms.Form):
     ordering_fields = ['title', 'created_at', 'updated_at']
-    ORDERING_CHOICES = ()
-    for ordering_field in ordering_fields:
-        ascending_field = (ordering_field, f'{ordering_field}_Ascending')
-        descending_field = (f'-{ordering_field}', f'{ordering_field}_Descending')
-        ORDERING_CHOICES += (ascending_field, ) + (descending_field, )
+    ORDERING_CHOICES = get_ordering_choices(ordering_fields)
     ordering = forms.ChoiceField(choices=ORDERING_CHOICES, required=False)
 
 
