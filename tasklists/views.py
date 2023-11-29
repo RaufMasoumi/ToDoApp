@@ -5,7 +5,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from tasks.views import TaskUpdateView
 from tasks.mixins import AllauthLoginRequiredMixin, ViewSOFMixin
 from tasks.models import add_task_to_tasklist, remove_task_from_tasklist
-from tasks.forms import TaskModelForm, SearchForm
+from tasks.forms import TaskModelForm, SearchForm, TaskOrderingForm, TASK_SEARCH_FIELDS
 from tasks.filters import TaskFilterSet
 from .mixins import UserTaskListQuerysetMixin, DynamicTaskListTaskQuerysetMixin
 from .permissions import DefaultTaskListPermissionMixin
@@ -27,13 +27,18 @@ class TaskListListView(AllauthLoginRequiredMixin, UserTaskListQuerysetMixin, Vie
     filterset_class = TaskListFilterSet
 
 
-class TaskListDetailView(AllauthLoginRequiredMixin, UserTaskListQuerysetMixin, DetailView):
+class TaskListDetailView(AllauthLoginRequiredMixin, UserTaskListQuerysetMixin, ViewSOFMixin, DetailView):
     template_name = 'tasklists/tasklist_detail.html'
+    search_form = SearchForm
+    search_filter_class = SearchFilter
+    search_fields = TASK_SEARCH_FIELDS
+    ordering_form = TaskOrderingForm
+    ordering_filter_class = OrderingFilter
+    ordering_fields = ordering_form.ordering_fields
+    filterset_class = TaskFilterSet
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['task_filter'] = TaskFilterSet(self.request.GET, self.get_object().tasks.all())
-        return context
+    def get_sof_queryset(self):
+        return self.get_object().tasks.all()
 
 
 class TaskListCreateView(AllauthLoginRequiredMixin, CreateView):

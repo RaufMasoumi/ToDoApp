@@ -5,7 +5,9 @@
 
 <h1>{{ tasklist.title }}</h1>
 <hr>
-{% for task in task_filter.qs %}
+    {% include 'snippets/search.html' %}
+<hr>
+{% for task in filter.qs %}
 <p>
     <h3><a href="{{ task.get_absolute_url }}">{{ task.title }}</a></h3>
     {% if task.due_date %}
@@ -41,9 +43,9 @@
     <h3><a href="{{ tasklist.get_absolute_update_url }}">Update {{ tasklist.title }} tasklist</a></h3> |
     <h3><a href="{{ tasklist.get_absolute_delete_url }}">Delete {{ tasklist.title }} tasklist</a></h3>
     <hr>
-    <form method="get">
-        {{ task_filter.form | crispy }}
-        <button type="submit" class="btn btn-success">Filter tasks</button>
-    </form>
+    {% include 'snippets/ordering.html' %}
+    <hr>
+    {% include 'snippets/filtering.html' %}
+    <hr>
 
 {% endblock %}

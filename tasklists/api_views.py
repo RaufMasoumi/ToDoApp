@@ -4,6 +4,7 @@ from rest_framework.filters import OrderingFilter, SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from tasks.serializers import TaskDetailSerializer
 from tasks.models import add_task_to_tasklist, remove_task_from_tasklist
+from tasks.forms import TASK_SEARCH_FIELDS, TASK_ORDERING_FIELDS
 from tasks.filters import TaskFilterSet
 from .serializers import TaskListListSerializer, TaskListDetailSerializer
 from .mixins import UserTaskListQuerysetMixin, DynamicTaskListTaskQuerysetMixin
@@ -43,7 +44,9 @@ class TaskListRUDApiView(UserTaskListQuerysetMixin, RetrieveUpdateDestroyAPIView
 class TaskListTaskLCApiView(DynamicTaskListTaskQuerysetMixin, ListCreateAPIView):
     serializer_class = TaskDetailSerializer
     permission_classes = [IsAuthenticated, TaskDefaultTaskListPermission]
-    filter_backends = [DjangoFilterBackend, ]
+    filter_backends = [SearchFilter, OrderingFilter, DjangoFilterBackend]
+    search_fields = TASK_SEARCH_FIELDS
+    ordering_fields = TASK_ORDERING_FIELDS
     filterset_class = TaskFilterSet
 
     def perform_create(self, serializer):
@@ -56,4 +59,3 @@ class TaskListTaskDestroyApiView(DynamicTaskListTaskQuerysetMixin, DestroyAPIVie
 
     def perform_destroy(self, instance):
         remove_task_from_tasklist(self.get_tasklist(), instance)
-
