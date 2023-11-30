@@ -16,16 +16,19 @@ class UserTaskQuerysetMixin:
 
 
 class TestUserSetUpMixin:
+    need_bad_user = True
+
     @classmethod
     def setUpTestData(cls):
         cls.user = get_user_model().objects.create_user(
             username='testuser',
             password='testpass123'
         )
-        cls.bad_user = get_user_model().objects.create_user(
-            username='testbaduser',
-            password='testpass1123'
-        )
+        if cls.need_bad_user:
+            cls.bad_user = get_user_model().objects.create_user(
+                username='testbaduser',
+                password='testpass1123'
+            )
 
     def get_bad_user(self):
         return getattr(self, 'bad_user', None)

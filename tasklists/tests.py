@@ -174,14 +174,12 @@ class TaskListTests(CustomTestCase):
         self.client.logout()
 
 
-class DefaultTaskListTaskTests(TestCase):
+class DefaultTaskListTaskTests(TestUserSetUpMixin, TestCase):
+    need_bad_user = False
 
     @classmethod
     def setUpTestData(cls):
-        cls.user = get_user_model().objects.create_user(
-            username='testuser',
-            password='testpass123'
-        )
+        super().setUpTestData()
         cls.default_tasklist_permission = Permission.objects.get(codename='default_tasklist')
 
     def setUp(self):
@@ -217,6 +215,50 @@ class DefaultTaskListTaskTests(TestCase):
         self.user.user_permissions.add(self.default_tasklist_permission)
         response = self.client.get(path)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.client.logout()
+
+
+class TaskListValidationTests(TestUserSetUpMixin, TestCase):
+    def setUp(self):
+        self.tasklist = TaskList.objects.create(
+            user=self.user,
+            title='testtasklist',
+        )
+        self.task = Task.objects.create(
+            user=self.user,
+            title='testtask'
+        )
+        self.bad_user_task = Task.objects.create(
+            user=self.bad_user,
+            title='testtask2'
+        )
+
+    def test_tasklist_title_validation(self, create_path=None, update_path=None, update_method='post'):
+        self.client.force_login(self.user)
+        create_path = create_path if create_path else reverse('tasklist-create')
+        data = {'title': 'testtasklist'}
+        should_be_title = f'{self.tasklist.title}(1)'
+        self.client.post(create_path, data)
+        tasklist = TaskList.objects.order_by('-created_at').first()
+        self.assertNotEqual(tasklist.title, data['title'])
+        self.assertEqual(tasklist.title, should_be_title)
+        update_path = update_path if update_path else tasklist.get_absolute_update_url()
+        getattr(self.client, update_method)(update_path, data)
+        tasklist.refresh_from_db()
+        self.assertEqual(tasklist.title, should_be_title)
+        self.client.logout()
+
+    def test_tasklist_tasks_validation(self):
+        self.client.force_login(self.user)
+        path = self.tasklist.get_absolute_update_url()
+        data = {
+            'title': self.tasklist.title,
+            'tasks': [self.task.pk, self.bad_user_task.pk]
+        }
+        self.client.post(path, data)
+        self.assertEqual(self.tasklist.tasks.count(), 1)
+        self.assertTrue(self.tasklist.tasks.filter(pk=self.task.pk).exists())
+        self.assertFalse(self.tasklist.tasks.filter(pk=self.bad_user_task.pk).exists())
         self.client.logout()
 
 
@@ -311,48 +353,4 @@ class TaskListTaskTests(CustomTestCase):
         self.assertRedirects(post_response, self.tasklist.get_absolute_url())
         self.assertFalse(self.tasklist.tasks.filter(pk=self.task.pk).exists())
         self.assertTrue(Task.objects.filter(pk=self.task.pk).exists())
-        self.client.logout()
-
-
-class TaskListValidationTests(TestUserSetUpMixin, TestCase):
-    def setUp(self):
-        self.tasklist = TaskList.objects.create(
-            user=self.user,
-            title='testtasklist',
-        )
-        self.task = Task.objects.create(
-            user=self.user,
-            title='testtask'
-        )
-        self.bad_user_task = Task.objects.create(
-            user=self.bad_user,
-            title='testtask2'
-        )
-
-    def test_tasklist_title_validation(self, create_path=None, update_path=None, update_method='post'):
-        self.client.force_login(self.user)
-        create_path = create_path if create_path else reverse('tasklist-create')
-        data = {'title': 'testtasklist'}
-        should_be_title = f'{self.tasklist.title}(1)'
-        self.client.post(create_path, data)
-        tasklist = TaskList.objects.order_by('-created_at').first()
-        self.assertNotEqual(tasklist.title, data['title'])
-        self.assertEqual(tasklist.title, should_be_title)
-        update_path = update_path if update_path else tasklist.get_absolute_update_url()
-        getattr(self.client, update_method)(update_path, data)
-        tasklist.refresh_from_db()
-        self.assertEqual(tasklist.title, should_be_title)
-        self.client.logout()
-
-    def test_tasklist_tasks_validation(self):
-        self.client.force_login(self.user)
-        path = self.tasklist.get_absolute_update_url()
-        data = {
-            'title': self.tasklist.title,
-            'tasks': [self.task.pk, self.bad_user_task.pk]
-        }
-        self.client.post(path, data)
-        self.assertEqual(self.tasklist.tasks.count(), 1)
-        self.assertTrue(self.tasklist.tasks.filter(pk=self.task.pk).exists())
-        self.assertFalse(self.tasklist.tasks.filter(pk=self.bad_user_task.pk).exists())
         self.client.logout()

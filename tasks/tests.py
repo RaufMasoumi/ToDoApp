@@ -1,8 +1,7 @@
 from django.shortcuts import reverse
 from django.test import TestCase
-from django.contrib.auth import get_user_model
 from rest_framework import status
-from .mixins import TestUserSetUpMixin, ViewBadUserTestsMixin
+from .mixins import TestUserSetUpMixin, ViewBadUserTestsMixin, ViewSOFMixin
 from .models import Task
 # Create your tests here.
 
@@ -126,4 +125,106 @@ class TaskValidationTests(TestUserSetUpMixin, TestCase):
         self.task.refresh_from_db()
         self.assertTrue(self.task.is_important)
         self.assertFalse(self.task.is_not_important)
+        self.client.logout()
+
+
+class ViewSOFMixinTests(TestUserSetUpMixin, TestCase):
+    need_bad_user = False
+    using_mixin_view_path = reverse('task-list')
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.tasks = []
+        for i in range(4):
+            task = Task.objects.create(
+                user=cls.user,
+                title=f'task{i+1}'
+            )
+            cls.tasks.append(task)
+
+    def test_mixin_searching(self):
+        self.client.force_login(self.user)
+        # all task scenario
+        data1 = {
+            'search': 'task'
+        }
+        response1 = self.client.get(self.using_mixin_view_path, data1)
+        for task in self.tasks:
+            self.assertIn(task, response1.context['filter'].qs)
+            self.assertContains(response1, task.title)
+        # one tasks scenario
+        data2 = {
+            'search': 'task1'
+        }
+        response2 = self.client.get(self.using_mixin_view_path, data2)
+        self.assertContains(response2, self.tasks[0])
+        for task in self.tasks[1:]:
+            self.assertNotIn(task, response2.context['filter'].qs)
+            self.assertNotContains(response2, task.title)
+        # no tasks scenario
+        data3 = {
+            'search': 'hello search!'
+        }
+        response3 = self.client.get(self.using_mixin_view_path, data3)
+        for task in self.tasks:
+            self.assertNotIn(task, response3.context['filter'].qs)
+            self.assertNotContains(response3, task.title)
+        self.client.logout()
+
+    def test_mixin_ordering(self):
+        self.client.force_login(self.user)
+        # ascending title ordering scenario
+        data1 = {
+            'ordering': 'title'
+        }
+        response1 = self.client.get(self.using_mixin_view_path, data1)
+        should_be_queryset = sorted(self.tasks, key=lambda task: task.title)
+        self.assertQuerysetEqual(response1.context['filter'].qs, should_be_queryset, ordered=True)
+        # descending title ordering scenario
+        data2 = {
+            'ordering': '-title'
+        }
+        response2 = self.client.get(self.using_mixin_view_path, data2)
+        should_be_queryset = sorted(self.tasks, key=lambda task: task.title, reverse=True)
+        self.assertQuerysetEqual(response2.context['filter'].qs, should_be_queryset, ordered=True)
+        self.client.logout()
+
+    def test_mixin_filtering(self):
+        self.client.force_login(self.user)
+        # all tasks filtering scenario
+        data1 = {
+            'title__icontains': 'task'
+        }
+        response1 = self.client.get(self.using_mixin_view_path, data1)
+        self.assertQuerysetEqual(response1.context['filter'].qs, self.tasks, ordered=False)
+        for task in self.tasks:
+            self.assertContains(response1, task)
+        # one task scenario
+        data2 = {
+            'title__iexact': 'task1'
+        }
+        response2 = self.client.get(self.using_mixin_view_path, data2)
+        self.assertQuerysetEqual(response2.context['filter'].qs, self.tasks[0:1])
+        self.assertContains(response2, self.tasks[0])
+        for task in self.tasks[1:]:
+            self.assertNotContains(response2, task)
+        # no tasks scenario
+        data3 = {
+            'is_done': True
+        }
+        response3 = self.client.get(self.using_mixin_view_path, data3)
+        self.assertQuerysetEqual(response3.context['filter'].qs, [])
+        for task in self.tasks:
+            self.assertNotContains(response3, task)
+        self.client.logout()
+
+
+class TaskSOFTests(TestUserSetUpMixin, TestCase):
+    need_bad_user = False
+
+    def test_task_list_view_supports_sof(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse('task-list'))
+        self.assertTrue(isinstance(response.context['view'], ViewSOFMixin))
         self.client.logout()
