@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from rest_framework import status
+from rest_framework.filters import SearchFilter, OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 class AllauthLoginRequiredMixin(LoginRequiredMixin):
@@ -99,6 +101,21 @@ class ViewSOFMixin:
 
     def get_sof_queryset(self):
         return getattr(self, 'sof_queryset', None)
+
+
+class ViewSOFSupportingTestsMixin:
+    def view_sof_test(self, path, user=None, method='get', api=False, filter_backends=None):
+        user = user if user else getattr(self, 'user', None)
+        self.client.force_login(user)
+        response = getattr(self.client, method)(path)
+        if not api:
+            self.assertTrue(isinstance(response.context['view'], ViewSOFMixin))
+        else:
+            should_be_filter_backends = filter_backends if filter_backends else [
+                SearchFilter, OrderingFilter, DjangoFilterBackend
+            ]
+            self.assertListEqual(response.renderer_context['view'].filter_backends, should_be_filter_backends)
+        self.client.logout()
 
 
 def get_redirected_login_url(coming_from):

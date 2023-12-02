@@ -6,7 +6,7 @@ from django.contrib.auth.models import Permission
 from rest_framework import status
 from tasks.models import Task, DEFAULT_TASKLISTS, DEFAULT_TASK_STATUSES
 from tasks.tests import CustomTestCase, SHOULD_NOT_CONTAIN_TEXT
-from tasks.mixins import TestUserSetUpMixin
+from tasks.mixins import TestUserSetUpMixin, ViewSOFSupportingTestsMixin
 from .models import TaskList
 
 # Create your tests here.
@@ -260,6 +260,13 @@ class TaskListValidationTests(TestUserSetUpMixin, TestCase):
         self.assertTrue(self.tasklist.tasks.filter(pk=self.task.pk).exists())
         self.assertFalse(self.tasklist.tasks.filter(pk=self.bad_user_task.pk).exists())
         self.client.logout()
+
+
+class TaskListSOFTests(TestUserSetUpMixin, ViewSOFSupportingTestsMixin, TestCase):
+    need_bad_user = False
+
+    def test_tasklist_list_view_supports_sof(self):
+        self.view_sof_test(reverse('tasklist-list'))
 
 
 class TaskListTaskTests(CustomTestCase):

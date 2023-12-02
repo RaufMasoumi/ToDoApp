@@ -6,6 +6,7 @@ from rest_framework.test import APITestCase
 from tasks.api_tests import CustomAPITestCase
 from tasks.tests import SHOULD_NOT_CONTAIN_TEXT
 from tasks.models import Task
+from tasks.mixins import TestUserSetUpMixin, ViewSOFSupportingTestsMixin
 from .models import TaskList
 from .tests import TaskListValidationTests
 
@@ -89,6 +90,13 @@ class TaskListAPITests(CustomAPITestCase):
         self.client.logout()
 
 
+class TaskListSOFAPITests(TestUserSetUpMixin, ViewSOFSupportingTestsMixin, APITestCase):
+    need_bad_user = False
+
+    def test_tasklist_list_api_view_supports_sof(self):
+        self.view_sof_test(reverse('api-tasklist-list'), api=True)
+
+
 class DefaultTasklistTasksAPITests(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -169,6 +177,21 @@ class TaskListTaskAPITests(CustomAPITestCase):
         self.assertEqual(self.tasklist.tasks.count(), 0)
         self.assertTrue(Task.objects.filter(pk=self.task.pk).exists())
         self.client.logout()
+
+
+class TaskListTaskSOFAPITests(TestUserSetUpMixin, ViewSOFSupportingTestsMixin, APITestCase):
+    need_bad_user = False
+
+    @classmethod
+    def setUpTestData(cls):
+        super().setUpTestData()
+        cls.tasklist = TaskList.objects.create(
+            user=cls.user,
+            title='testtasklist'
+        )
+
+    def test_tasklist_task_lc_api_view_supports_sof(self):
+        self.view_sof_test(reverse('api-tasklist-task-list', kwargs={'tasklist': self.tasklist.slug}), api=True)
 
 
 class TaskListValidationAPITests(TaskListValidationTests):

@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework.backends import DjangoFilterBackend
-from .mixins import TestUserSetUpMixin, ViewBadUserTestsMixin
+from .mixins import TestUserSetUpMixin, ViewBadUserTestsMixin, ViewSOFSupportingTestsMixin
 from .tests import SHOULD_NOT_CONTAIN_TEXT, TaskValidationTests
 from .models import Task
 
@@ -97,12 +97,8 @@ class TaskValidationAPITests(APITestCase, TaskValidationTests):
         return super().test_task_status_validation(update_path, update_method)
 
 
-class TaskSOFAPITests(TestUserSetUpMixin, APITestCase):
+class TaskSOFAPITests(TestUserSetUpMixin, ViewSOFSupportingTestsMixin, APITestCase):
     need_bad_user = False
-    sof_filter_backends = [SearchFilter, OrderingFilter, DjangoFilterBackend]
 
     def test_task_list_api_view_supports_sof(self):
-        self.client.force_login(self.user)
-        response = self.client.get(reverse('api-task-list'))
-        self.assertListEqual(response.renderer_context['view'].filter_backends, self.sof_filter_backends)
-        self.client.logout()
+        self.view_sof_test(reverse('api-task-list'), api=True)

@@ -1,7 +1,7 @@
 from django.shortcuts import reverse
 from django.test import TestCase
 from rest_framework import status
-from .mixins import TestUserSetUpMixin, ViewBadUserTestsMixin, ViewSOFMixin
+from .mixins import TestUserSetUpMixin, ViewBadUserTestsMixin, ViewSOFMixin, ViewSOFSupportingTestsMixin
 from .models import Task
 # Create your tests here.
 
@@ -220,11 +220,8 @@ class ViewSOFMixinTests(TestUserSetUpMixin, TestCase):
         self.client.logout()
 
 
-class TaskSOFTests(TestUserSetUpMixin, TestCase):
+class TaskSOFTests(TestUserSetUpMixin, ViewSOFSupportingTestsMixin, TestCase):
     need_bad_user = False
 
     def test_task_list_view_supports_sof(self):
-        self.client.force_login(self.user)
-        response = self.client.get(reverse('task-list'))
-        self.assertTrue(isinstance(response.context['view'], ViewSOFMixin))
-        self.client.logout()
+        self.view_sof_test(reverse('task-list'))
