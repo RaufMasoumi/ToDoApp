@@ -9,7 +9,7 @@ class TaskDetailSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Task
-        fields = ['id', 'url', 'user', 'title', 'due_date', 'is_done', 'is_important', 'is_not_important',
+        fields = ['id', 'url', 'user', 'title', 'due_date', 'is_daily', 'is_done', 'is_important', 'is_not_important',
                   'is_timely_important', 'tasklists', 'created_at', 'updated_at', 'done_at']
 
         extra_kwargs = {
@@ -21,14 +21,14 @@ class TaskDetailSerializer(serializers.HyperlinkedModelSerializer):
     def create(self, validated_data):
         validated_data, tasklists = get_tasklists_from_data(validated_data)
         task = super().create(validated_data)
-        task.tasklists.set(tasklists)
+        task.tasklists.set(task.tasklists.default_tasklists() | tasklists)
         task.save()
         return task
 
     def update(self, instance, validated_data):
         validated_data, tasklists = get_tasklists_from_data(validated_data, instance)
         task = super().update(instance, validated_data)
-        task.tasklists.set(tasklists)
+        task.tasklists.set(task.tasklists.default_tasklists() | tasklists)
         task.save()
         return task
 
