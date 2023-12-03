@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, SimpleTestCase
 from django.shortcuts import reverse
 from django.utils import timezone
 from django.contrib.auth import get_user_model
@@ -8,6 +8,7 @@ from tasks.models import Task, DEFAULT_TASKLISTS, DEFAULT_TASK_STATUSES
 from tasks.tests import CustomTestCase, SHOULD_NOT_CONTAIN_TEXT
 from tasks.mixins import TestUserSetUpMixin, ViewSOFSupportingTestsMixin
 from .models import TaskList
+from .filters import TaskListFilterSet, TASKLIST_FILTERSETS_LIST
 
 # Create your tests here.
 
@@ -413,3 +414,8 @@ class DjangoFiltersMiddlewareTests(TestUserSetUpMixin, TestCase):
         self.assertRedirects(response, self.sof_supporting_view_path)
         self.assertEqual(response.url.find('?'), -1)
         self.client.logout()
+
+
+class TaskListFilterSetsTests(SimpleTestCase):
+    def test_django_filters_middleware_supports_tasklist_filterset(self):
+        self.assertIn(TaskListFilterSet, TASKLIST_FILTERSETS_LIST)

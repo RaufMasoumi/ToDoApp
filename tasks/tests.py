@@ -1,8 +1,10 @@
 from django.shortcuts import reverse
-from django.test import TestCase
+from django.test import TestCase, SimpleTestCase
 from rest_framework import status
-from .mixins import TestUserSetUpMixin, ViewBadUserTestsMixin, ViewSOFMixin, ViewSOFSupportingTestsMixin
+from .mixins import TestUserSetUpMixin, ViewBadUserTestsMixin, ViewSOFSupportingTestsMixin
 from .models import Task
+from .filters import TASK_FILTERSETS_LIST, TaskFilterSet
+
 # Create your tests here.
 
 SHOULD_NOT_CONTAIN_TEXT = 'Hello I should not be in the template!'
@@ -225,3 +227,8 @@ class TaskSOFTests(TestUserSetUpMixin, ViewSOFSupportingTestsMixin, TestCase):
 
     def test_task_list_view_supports_sof(self):
         self.view_sof_test(reverse('task-list'))
+
+
+class TaskFilterSetsTests(SimpleTestCase):
+    def test_django_filters_middleware_supports_task_filterset(self):
+        self.assertIn(TaskFilterSet, TASK_FILTERSETS_LIST)
