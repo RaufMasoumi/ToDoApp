@@ -361,3 +361,55 @@ class TaskListTaskTests(CustomTestCase):
         self.assertFalse(self.tasklist.tasks.filter(pk=self.task.pk).exists())
         self.assertTrue(Task.objects.filter(pk=self.task.pk).exists())
         self.client.logout()
+
+
+class DjangoFiltersMiddlewareTests(TestUserSetUpMixin, TestCase):
+    sof_supporting_view_path = reverse('tasklist-list')
+
+    def test_middleware_does_not_affect_empty_request(self):
+        self.client.force_login(self.user)
+        response = self.client.get(self.sof_supporting_view_path)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.client.logout()
+
+    def test_middleware_does_not_affect_non_related_request(self):
+        self.client.force_login(self.user)
+        data = {
+            'hello': 'world!'
+        }
+        response = self.client.get(self.sof_supporting_view_path, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.client.logout()
+
+    def test_middleware_does_not_affect_proper_request(self):
+        self.client.force_login(self.user)
+        data = {
+            'title__iexact': 'testtasklist'
+        }
+        response = self.client.get(self.sof_supporting_view_path, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.client.logout()
+
+    def test_middleware_changes_improper_request(self):
+        self.client.force_login(self.user)
+        data = {
+            'title__iexact': 'testtasklist',
+            'title__icontains': ''
+        }
+        response = self.client.get(self.sof_supporting_view_path, data)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        new_data = {k: v for k, v in data.items() if v}
+        kwargs = '+'.join([f'{k}={v}' for k, v in new_data.items()])
+        self.assertRedirects(response, f'{self.sof_supporting_view_path}?{kwargs}')
+        self.client.logout()
+
+    def test_middleware_removes_question_mark_on_empty_url(self):
+        self.client.force_login(self.user)
+        data = {
+            'title__iexact': ''
+        }
+        response = self.client.get(self.sof_supporting_view_path, data)
+        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(response, self.sof_supporting_view_path)
+        self.assertEqual(response.url.find('?'), -1)
+        self.client.logout()
