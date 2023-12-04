@@ -20,8 +20,9 @@
     {% endif %}
     {% block content %}{% endblock %}
     <hr>
-    <a href="{% url 'tasklist-list' %}">Task Lists</a> |
-    <a href="{% url 'task-list' %}">All tasks</a>
+    <a href="{% url 'tasklist-list' %}">TaskLists</a> |
+    <a href="{% url 'task-list' %}">All tasks</a> |
+    <a href="{% url 'category-list' %}">Categories</a>
     <hr>
     <a href="{% url 'api-home' %}">APIs</a>
     <!-- Optional JavaScript -->

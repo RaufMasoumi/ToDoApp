@@ -4,7 +4,9 @@ from django.contrib.auth import get_user_model
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.urls import reverse
+from categories.models import Category
 import uuid
+
 
 # Create your models here.
 DEFAULT_TASKLISTS = {
@@ -26,6 +28,7 @@ class Task(models.Model):
     is_important = models.BooleanField(default=False, blank=True)
     is_not_important = models.BooleanField(default=False, blank=True)
     is_timely_important = models.BooleanField(default=False, blank=True)
+    categories = models.ManyToManyField(Category, related_name='tasks', blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     done_at = models.DateTimeField(blank=True, null=True)

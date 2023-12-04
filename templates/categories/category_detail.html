@@ -1,0 +1,16 @@
+{% extends '_base.html' %}
+
+{% block content %}
+    <h1>{{ category.title }}</h1>
+    <h3>Tasks:</h3>
+    {% for task in category.tasks.all %}
+        <p>
+            <h4><a href="{{ task.get_absolute_url }}">{{ task.title }}</a></h4>
+        </p>
+    {% endfor %}
+    <hr>
+    <h5>Created at: {{ category.created_at }}</h5>
+    <h5>Updated at: {{ category.updated_at }}</h5>
+    <h5><a href="{% url 'category-update' category.slug %}">Update category</a></h5>
+    <h5><a href="{% url 'category-delete' category.slug %}">Delete category</a></h5>
+{% endblock %}

@@ -26,6 +26,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('tasks/', include('tasks.urls')),
     path('tasklists/', include('tasklists.urls')),
+    path('categories/', include('categories.urls')),
 ]
 
 api_urlpatterns = [
@@ -36,6 +37,7 @@ api_urlpatterns = [
     path('api/accounts/', include('accounts.api_urls')),
     path('api/tasks/', include('tasks.api_urls')),
     path('api/tasklists/', include('tasklists.api_urls')),
+    path('api/categories/', include('categories.api_urls'))
 
 ]
 

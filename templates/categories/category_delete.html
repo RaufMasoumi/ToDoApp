@@ -1,0 +1,11 @@
+{% extends '_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <h1>Delete <a href="{{ category.get_absolute_url }}">{{ category.title }}</a> category</h1>
+    <h3>Are you sure you want to delete {{ category.title }}?!</h3>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete</button>
+    </form>
+{% endblock %}

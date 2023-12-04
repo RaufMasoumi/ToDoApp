@@ -1,0 +1,14 @@
+{% extends '_base.html' %}
+
+
+{% block content %}
+    <h1>Categories</h1>
+    {% for category in categories %}
+        <p>
+            <h3><a href="{{ category.get_absolute_url }}">{{ category.title }}</a></h3>
+        </p>
+    {% endfor %}
+    <hr>
+    <h3><a href="{% url 'category-create' %}">Create a new Category</a></h3>
+    <hr>
+{% endblock %}
