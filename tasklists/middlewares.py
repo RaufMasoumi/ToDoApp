@@ -1,5 +1,13 @@
 from django.shortcuts import redirect
-from .filters import ALL_FILTERSETS_FIELD_NAMES
+from tasks.filters import TASK_FILTERSETS_LIST
+from .filters import TASKLIST_FILTERSETS_LIST
+
+FILTERSETS_LIST = TASK_FILTERSETS_LIST + TASKLIST_FILTERSETS_LIST
+ALL_FILTERSETS_FIELD_NAMES = set()
+for filterset in FILTERSETS_LIST:
+    for field_name, lookup_exprs in filterset.get_fields().items():
+        for lookup_expr in lookup_exprs:
+            ALL_FILTERSETS_FIELD_NAMES.add(filterset.get_filter_name(field_name, lookup_expr))
 
 
 class DjangoFiltersMiddleware:
