@@ -78,7 +78,7 @@ class ViewBadUserTestsMixin(TestUserSetUpMixin):
 
 # SOF stands for Searching, Ordering, Filtering
 class ViewSOFMixin:
-    sof_queryset = None
+    filter_queryset = None
     search_form = None
     search_filter_class = None
     search_fields = None
@@ -86,11 +86,10 @@ class ViewSOFMixin:
     ordering_filter_class = None
     ordering_fields = None
     filterset_class = None
-    request = None
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(object_list=object_list, **kwargs)
-        queryset = self.get_sof_queryset() if self.get_sof_queryset() else self.get_queryset()
+        queryset = self.get_filter_queryset()
         self.request.query_params = self.request.GET
         queryset = self.ordering_filter_class().filter_queryset(self.request, queryset, self)
         queryset = self.search_filter_class().filter_queryset(self.request, queryset, self)
@@ -99,8 +98,9 @@ class ViewSOFMixin:
         context['ordering_form'] = self.ordering_form(self.request.GET)
         return context
 
-    def get_sof_queryset(self):
-        return getattr(self, 'sof_queryset', None)
+    def get_filter_queryset(self):
+        filter_queryset = getattr(self, 'filter_queryset', None)
+        return filter_queryset if filter_queryset else self.get_queryset()
 
 
 class ViewSOFSupportingTestsMixin:

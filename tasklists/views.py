@@ -37,7 +37,7 @@ class TaskListDetailView(AllauthLoginRequiredMixin, UserTaskListQuerysetMixin, V
     ordering_fields = ordering_form.ordering_fields
     filterset_class = TaskFilterSet
 
-    def get_sof_queryset(self):
+    def get_filter_queryset(self):
         return self.get_object().tasks.all()
 
 

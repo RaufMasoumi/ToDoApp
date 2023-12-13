@@ -43,12 +43,13 @@ class FormInitAdditionalDataMixin:
 
 
 class FormTitleValidationMixin(FormInitAdditionalDataMixin):
+    reverse_relation = 'tasklists'
 
     def clean_title(self):
         base_title = self.cleaned_data.get('title', None)
         if 'title' not in self.changed_data:
             return base_title
-        title = validate_title(base_title, self.instance, self.user.tasklists)
+        title = validate_title(base_title, self.instance, getattr(self.user, self.reverse_relation, None))
         return title
 
 
