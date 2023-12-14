@@ -5,12 +5,14 @@
     <h3>Tasks:</h3>
     {% for task in filter.qs %}
         <p>
-            <h4><a href="{{ task.get_absolute_url }}">{{ task.title }}</a></h4>
+            <h4><a href="{{ task.get_absolute_url }}">{{ task.title }}</a></h4> <a style="color: red" href="{% url 'category-task-delete' category.slug task.pk %}">Remove from the category</a>
         </p>
+        <hr>
     {% endfor %}
-    <hr>
     <h5>Created at: {{ category.created_at }}</h5>
     <h5>Updated at: {{ category.updated_at }}</h5>
+    <hr>
+    <h5><a href="{% url 'category-task-create' category.slug %}">Add a new Task for this category</a></h5>
     <hr>
     <h5><a href="{% url 'category-update' category.slug %}">Update category</a></h5> |
     <h5><a href="{% url 'category-delete' category.slug %}">Delete category</a></h5>

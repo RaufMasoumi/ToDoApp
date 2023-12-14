@@ -1,0 +1,15 @@
+{% extends '_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <h1>Create a new Task
+        {% if category %}
+            for <a href="{{ category.get_absolute_url }}">{{ category.title }}</a>
+        {% endif %}
+    </h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form | crispy }}
+        <button type="submit" class="btn btn-success">Create and add to the category</button>
+    </form>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends '_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<h1>Remove Task from Category</h1>
+<form method="post">
+    <h3>Are you sure you want to delete <a href="{{ task.get_absolute_url }}">'{{ task.get_short_title }}'</a> Task from
+        <a href="{{ category.get_absolute_url }}">{{ category.title }}</a> Category?!
+    </h3>
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Remove</button>
+</form>
+{% endblock %}
