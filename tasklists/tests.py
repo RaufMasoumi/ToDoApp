@@ -295,7 +295,7 @@ class TaskListTaskTests(CustomTestCase):
         self.assertContains(get_response, 'Create')
         self.assertContains(get_response, self.tasklist.title)
         self.assertNotContains(get_response, 'Update')
-        self.assertTemplateUsed(get_response, 'tasks/task_create.html')
+        self.assertTemplateUsed(get_response, 'tasklists/tasklist_task_create.html')
         # post
         data = {
             'title': 'new task',
@@ -350,11 +350,11 @@ class TaskListTaskTests(CustomTestCase):
         # get
         get_response = self.client.get(path)
         self.assertEqual(get_response.status_code, status.HTTP_200_OK)
-        self.assertContains(get_response, 'Delete')
+        self.assertContains(get_response, 'Remove')
         self.assertContains(get_response, self.task.title)
         self.assertContains(get_response, self.tasklist.title)
         self.assertNotContains(get_response, 'Update')
-        self.assertTemplateUsed(get_response, 'tasks/task_delete.html')
+        self.assertTemplateUsed(get_response, 'tasklists/tasklist_task_delete.html')
         # post (as delete)
         post_response = self.client.post(path)
         self.assertEqual(post_response.status_code, status.HTTP_302_FOUND)

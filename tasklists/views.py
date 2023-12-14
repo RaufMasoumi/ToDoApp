@@ -72,25 +72,20 @@ class TaskListDeleteView(AllauthLoginRequiredMixin, DefaultTaskListPermissionMix
     success_url = reverse_lazy('tasklist-list')
 
 
-class TaskListTaskCreateView(AllauthLoginRequiredMixin, DefaultTaskListPermissionMixin, CreateView):
-    template_name = 'tasks/task_create.html'
+class TaskListTaskCreateView(AllauthLoginRequiredMixin, DefaultTaskListPermissionMixin, DynamicTaskListTaskQuerysetMixin, CreateView):
+    template_name = 'tasklists/tasklist_task_create.html'
     form_class = TaskModelForm
-
-    def get_object(self, queryset=None):
-        mixin = UserTaskListQuerysetMixin(self.request)
-        queryset = mixin.get_queryset()
-        self.slug_url_kwarg = 'tasklist'
-        return super().get_object(queryset=queryset)
+    tasklist_getter = 'get_tasklist'
 
     def form_valid(self, form):
         form.instance.user = self.request.user
         task = self.object = form.save()
-        tasklist = add_task_to_tasklist(self.get_object(), task)
+        tasklist = add_task_to_tasklist(self.get_tasklist(), task)
         return HttpResponseRedirect(tasklist.get_absolute_url())
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['tasklist'] = self.get_object()
+        context['tasklist'] = self.get_tasklist()
         return context
 
 
@@ -105,7 +100,7 @@ class TaskListTaskUpdateView(TaskUpdateView):
 
 
 class TaskListTaskDeleteView(AllauthLoginRequiredMixin, DefaultTaskListPermissionMixin, DynamicTaskListTaskQuerysetMixin, DeleteView):
-    template_name = 'tasks/task_delete.html'
+    template_name = 'tasklists/tasklist_task_delete.html'
     tasklist_getter = 'get_tasklist'
 
     def get_success_url(self):

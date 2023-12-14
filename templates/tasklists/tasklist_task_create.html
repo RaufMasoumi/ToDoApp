@@ -1,0 +1,15 @@
+{% extends '_base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<h1>Create a new task
+    {% if tasklist %}
+        for <a href="{{ tasklist.get_absolute_url }}">{{ tasklist.title }}</a>
+    {% endif %}
+</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form | crispy }}
+    <button type="submit" class="btn btn-success">Create and add to the tasklist</button>
+</form>
+{% endblock %}
