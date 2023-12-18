@@ -1,5 +1,6 @@
 from django import forms
 from tasklists.mixins import FormTitleValidationMixin
+from tasklists.forms import CustomModelForm
 from tasks.forms import get_ordering_choices
 from .models import Category
 
@@ -7,7 +8,7 @@ CATEGORY_SEARCH_FIELDS = ['title', ]
 CATEGORY_ORDERING_FIELDS = ['title', 'created_at', 'updated_at']
 
 
-class CategoryModelForm(FormTitleValidationMixin, forms.ModelForm):
+class CategoryModelForm(FormTitleValidationMixin, CustomModelForm):
     reverse_relation = 'categories'
 
     class Meta:

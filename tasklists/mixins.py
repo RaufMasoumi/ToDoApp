@@ -28,21 +28,7 @@ class TasksCountMixin:
         return obj.tasks.count()
 
 
-class FormInitAdditionalDataMixin:
-
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
-        self.instance_user = kwargs.pop('instance_user', None)
-        super().__init__(*args, **kwargs)
-        if hasattr(self.instance, 'user'):
-            self.user = self.instance.user
-        elif self.instance_user:
-            self.user = self.instance_user
-        else:
-            self.user = self.request.user
-
-
-class FormTitleValidationMixin(FormInitAdditionalDataMixin):
+class FormTitleValidationMixin:
     reverse_relation = 'tasklists'
 
     def clean_title(self):
@@ -53,22 +39,9 @@ class FormTitleValidationMixin(FormInitAdditionalDataMixin):
         return title
 
 
-class SerializerInitAdditionalDataMixin:
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.request = self.context.get('request', None)
-        self.instance_user = self.context.get('instance_user', None)
-        if hasattr(self.context.get('instance', None), 'user'):
-            self.user = self.context['instance'].user
-        elif self.instance_user:
-            self.user = self.instance_user
-        else:
-            self.user = self.request.user
-
-
-class SerializerTitleValidationMixin(SerializerInitAdditionalDataMixin):
+class SerializerTitleValidationMixin:
+    user_queryset_related_name = None
 
     def validate_title(self, value):
-        title = validate_title(value, self.instance, self.user.tasklists)
+        title = validate_title(value, self.instance, getattr(self.request.user, self.user_queryset_related_name, None))
         return title
