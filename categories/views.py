@@ -8,7 +8,7 @@ from tasks.forms import SearchForm, TaskOrderingForm, TASK_SEARCH_FIELDS, TaskMo
 from tasks.filters import TaskFilterSet
 from tasks.views import TaskUpdateView
 from .models import Category
-from .mixins import UserCategoryQuerysetMixin, DynamicCategoryTaskMixin
+from .mixins import UserCategoryQuerysetMixin, DynamicCategoryTaskQuerysetMixin
 from .forms import CategoryModelForm, CategoryOrderingForm, CATEGORY_SEARCH_FIELDS
 from .filters import CategoryFilterSet
 # Create your views here.
@@ -72,7 +72,7 @@ class CategoryDeleteView(AllauthLoginRequiredMixin, UserCategoryQuerysetMixin, D
     success_url = reverse_lazy('category-list')
 
 
-class CategoryTaskCreateView(AllauthLoginRequiredMixin, DynamicCategoryTaskMixin, CreateView):
+class CategoryTaskCreateView(AllauthLoginRequiredMixin, DynamicCategoryTaskQuerysetMixin, CreateView):
     template_name = 'categories/category_task_create.html'
     form_class = TaskModelForm
 
@@ -102,7 +102,7 @@ class CategoryTaskUpdateView(TaskUpdateView):
         return success_url
 
 
-class CategoryTaskDeleteView(AllauthLoginRequiredMixin, DynamicCategoryTaskMixin, DeleteView):
+class CategoryTaskDeleteView(AllauthLoginRequiredMixin, DynamicCategoryTaskQuerysetMixin, DeleteView):
     template_name = 'categories/category_task_delete.html'
 
     def get_success_url(self):

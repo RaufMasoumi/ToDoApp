@@ -7,7 +7,7 @@ class UserCategoryQuerysetMixin:
         return self.request.user.categories.all()
 
 
-class DynamicCategoryTaskMixin:
+class DynamicCategoryTaskQuerysetMixin:
 
     def get_category(self):
         user_categories = self.request.user.categories.all()
