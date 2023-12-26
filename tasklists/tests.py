@@ -167,8 +167,8 @@ class TaskListTests(CustomTestCase):
         self.assertContains(get_response, self.tasklist.title)
         self.assertNotContains(get_response, 'Create')
         self.assertTemplateUsed(get_response, 'tasklists/tasklist_delete.html')
-        # delete
-        delete_response = self.client.delete(path)
+        # post(as delete)
+        delete_response = self.client.post(path)
         self.assertEqual(delete_response.status_code, status.HTTP_302_FOUND)
         self.assertRedirects(delete_response, reverse('tasklist-list'))
         self.assertFalse(TaskList.objects.filter(id=self.tasklist.id).exists())

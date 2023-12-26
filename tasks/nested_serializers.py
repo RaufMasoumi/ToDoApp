@@ -1,12 +1,13 @@
 from rest_framework import serializers
+from .models import Task
 
 
-class TaskNestedSerializer(serializers.Serializer):
-    url = serializers.HyperlinkedIdentityField(view_name='api-task-detail')
-    title = serializers.CharField(max_length=300)
+class TaskNestedSerializer(serializers.HyperlinkedModelSerializer):
 
-    def create(self, validated_data):
-        pass
-
-    def update(self, instance, validated_data):
-        pass
+    class Meta:
+        model = Task
+        fields = ['url', 'id', 'title']
+        extra_kwargs = {
+            'url': {'view_name': 'api-task-detail'},
+            'title': {'required': False}
+        }
