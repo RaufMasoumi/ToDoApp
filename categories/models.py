@@ -29,3 +29,6 @@ class Category(models.Model):
 
     def get_absolute_url(self):
         return reverse('category-detail', kwargs={'slug': self.slug})
+
+    def get_absolute_api_url(self):
+        return reverse('api-category-detail', kwargs={'slug': self.slug})
