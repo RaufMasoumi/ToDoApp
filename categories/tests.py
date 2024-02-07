@@ -1,5 +1,8 @@
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
+from rest_framework import status
 from tasks.test_mixins import GenericViewsTestCase
+from tasks.tests import CustomTestCase
+from tasks.models import Task
 from .models import Category
 
 
@@ -65,3 +68,84 @@ class CategoryTests(GenericViewsTestCase):
     )
     def test_category_delete_view(self, path, get_response, post_response, deleted_obj, success_url):
         pass
+
+
+class CategoryTasksTests(CustomTestCase):
+    def setUp(self):
+        self.category = Category.objects.create(
+            user=self.user,
+            title='testcategory'
+        )
+        self.task = Task.objects.create(
+            user=self.user,
+            title='testtask'
+        )
+        self.task.categories.add(self.category)
+
+    def test_category_task_create_view(self):
+        path = reverse('category-task-create', kwargs={'category': self.category.slug})
+        # bad user test
+        self.login_required_and_user_itself_or_somecode_test(path)
+        # correct user test
+        self.client.force_login(self.user)
+        # get
+        get_response = self.client.get(path)
+        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
+        self.assertContains(get_response, 'Create')
+        self.assertContains(get_response, self.category.title)
+        self.assertNotContains(get_response, 'Update')
+        self.assertTemplateUsed(get_response, 'categories/category_task_create.html')
+        # post
+        data = {
+            'title': 'newtask'
+        }
+        post_response = self.client.post(path, data)
+        self.assertEqual(post_response.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(post_response, self.category.get_absolute_url())
+        self.assertEqual(self.category.tasks.count(), 2)
+        self.assertEqual(self.category.tasks.order_by('-created_at').first().title, data['title'])
+        self.client.logout()
+
+    def test_category_task_update_view(self):
+        path = reverse('category-task-update', kwargs={'category': self.category.slug, 'pk': self.task.pk})
+        # bad user test
+        self.login_required_and_user_itself_or_somecode_test(path)
+        # correct user test
+        self.client.force_login(self.user)
+        # get
+        get_response = self.client.get(path)
+        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
+        self.assertContains(get_response, 'Update')
+        self.assertNotContains(get_response, 'Create')
+        self.assertTemplateUsed(get_response, 'tasks/task_update.html')
+        # post
+        data = {
+            'title': 'updated'
+        }
+        post_response = self.client.post(path, data)
+        self.assertEqual(post_response.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(post_response, self.category.get_absolute_url())
+        self.task.refresh_from_db()
+        self.assertEqual(self.task.title, data['title'])
+        self.client.logout()
+
+    def test_category_task_delete_view(self):
+        path = reverse('category-task-delete', kwargs={'category': self.category.slug, 'pk': self.task.pk})
+        # bad user test
+        self.login_required_and_user_itself_or_somecode_test(path)
+        # correct user test
+        self.client.force_login(self.user)
+        # get
+        get_response = self.client.get(path)
+        self.assertEqual(get_response.status_code, status.HTTP_200_OK)
+        self.assertContains(get_response, 'Remove')
+        self.assertContains(get_response, self.category.title)
+        self.assertNotContains(get_response, 'Update')
+        self.assertTemplateUsed(get_response, 'categories/category_task_delete.html')
+        # post (as delete)
+        post_response = self.client.post(path)
+        self.assertEqual(post_response.status_code, status.HTTP_302_FOUND)
+        self.assertRedirects(post_response, self.category.get_absolute_url())
+        self.assertEqual(self.category.tasks.count(), 0)
+        self.assertTrue(Task.objects.filter(pk=self.task.pk))
+        self.client.logout()
