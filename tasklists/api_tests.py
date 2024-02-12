@@ -140,9 +140,6 @@ class TaskListTaskAPITests(CustomAPITestCase):
         )
         self.tasklist.tasks.add(self.task)
 
-    def login_required_and_user_itself_or_somecode_test(self, path, method='delete', **kwargs):
-        super().login_required_and_user_itself_or_somecode_test(path, method=method)
-
     def test_tasklist_task_lc_api_view(self):
         path = reverse('api-tasklist-task-list', kwargs={'tasklist': self.tasklist.slug})
         # bad user test
@@ -169,7 +166,7 @@ class TaskListTaskAPITests(CustomAPITestCase):
     def test_tasklist_task_destroy_api_view(self):
         path = reverse('api-tasklist-task-delete', kwargs={'tasklist': self.tasklist.slug, 'pk': self.task.pk})
         # bad user test
-        self.login_required_and_user_itself_or_somecode_test(path)
+        self.login_required_and_user_itself_or_somecode_test(path, method='delete')
         # correct user test
         self.client.force_login(self.user)
         delete_response = self.client.delete(path)
