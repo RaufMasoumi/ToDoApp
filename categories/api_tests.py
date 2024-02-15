@@ -1,6 +1,8 @@
 from django.shortcuts import reverse
 from rest_framework import status
+from rest_framework.test import APITestCase
 from tasks.api_tests import CustomAPITestCase, SHOULD_NOT_CONTAIN_TEXT
+from tasks.mixins import TestUserSetUpMixin, ViewSOFSupportingTestsMixin
 from tasks.models import Task
 from .models import Category
 
@@ -69,6 +71,18 @@ class CategoryAPITests(CustomAPITestCase):
         self.client.logout()
 
 
+class CategorySOFAPITests(ViewSOFSupportingTestsMixin, TestUserSetUpMixin, APITestCase):
+    def setUp(self):
+        super().setUp()
+        self.category = Category.objects.create(
+            user=self.user,
+            title='testcategory'
+        )
+
+    def test_category_lc_api_view_supports_sof(self):
+        self.view_sof_test(reverse('api-category-list'), api=True)
+
+
 class CategoryTaskAPITests(CustomAPITestCase):
     def setUp(self):
         self.category = Category.objects.create(
@@ -113,3 +127,15 @@ class CategoryTaskAPITests(CustomAPITestCase):
         self.assertEqual(self.category.tasks.count(), 0)
         self.assertTrue(Task.objects.filter(pk=self.task.pk).exists())
         self.client.logout()
+
+
+class CategoryTaskSOFAPITests(ViewSOFSupportingTestsMixin, TestUserSetUpMixin, APITestCase):
+    def setUp(self):
+        super().setUp()
+        self.category = Category.objects.create(
+            user=self.user,
+            title='testcategory'
+        )
+
+    def test_category_task_lc_api_view_supports_sof(self):
+        self.view_sof_test(reverse('api-category-task-list', kwargs={'category': self.category.slug}), api=True)

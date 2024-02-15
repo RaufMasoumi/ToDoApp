@@ -1,7 +1,9 @@
+from django.test import TestCase
 from django.urls import reverse_lazy, reverse
 from rest_framework import status
 from tasks.test_mixins import GenericViewsTestCase
 from tasks.tests import CustomTestCase
+from tasks.mixins import ViewSOFSupportingTestsMixin, TestUserSetUpMixin
 from tasks.models import Task
 from .models import Category
 
@@ -68,6 +70,21 @@ class CategoryTests(GenericViewsTestCase):
     )
     def test_category_delete_view(self, path, get_response, post_response, deleted_obj, success_url):
         pass
+
+
+class CategorySOFTests(ViewSOFSupportingTestsMixin, TestUserSetUpMixin, TestCase):
+    def setUp(self):
+        super().setUp()
+        self.category = Category.objects.create(
+            user=self.user,
+            title='testcategory'
+        )
+
+    def test_category_list_view_supports_sof(self):
+        self.view_sof_test(reverse('category-list'))
+
+    def test_category_detail_view_supports_sof(self):
+        self.view_sof_test(reverse('category-detail', kwargs={'slug': self.category.slug}))
 
 
 class CategoryTasksTests(CustomTestCase):
