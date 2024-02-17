@@ -5,6 +5,7 @@ from tasks.api_tests import CustomAPITestCase, SHOULD_NOT_CONTAIN_TEXT
 from tasks.mixins import TestUserSetUpMixin, ViewSOFSupportingTestsMixin
 from tasks.models import Task
 from .models import Category
+from .tests import CategoryValidationTests
 
 
 class CategoryAPITests(CustomAPITestCase):
@@ -81,6 +82,13 @@ class CategorySOFAPITests(ViewSOFSupportingTestsMixin, TestUserSetUpMixin, APITe
 
     def test_category_lc_api_view_supports_sof(self):
         self.view_sof_test(reverse('api-category-list'), api=True)
+
+
+class CategoryValidationAPITests(CategoryValidationTests):
+    def test_category_title_validation(self, create_path=None, update_path=None, update_method='put'):
+        create_path = reverse('api-category-list')
+        update_path = self.category.get_absolute_api_url()
+        return super().test_category_title_validation(create_path, update_path)
 
 
 class CategoryTaskAPITests(CustomAPITestCase):

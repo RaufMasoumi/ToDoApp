@@ -87,6 +87,30 @@ class CategorySOFTests(ViewSOFSupportingTestsMixin, TestUserSetUpMixin, TestCase
         self.view_sof_test(reverse('category-detail', kwargs={'slug': self.category.slug}))
 
 
+class CategoryValidationTests(TestUserSetUpMixin, TestCase):
+    def setUp(self):
+        super().setUp()
+        self.category = Category.objects.create(
+            user=self.user,
+            title='testcategory'
+        )
+
+    def test_category_title_validation(self, create_path=None, update_path=None, update_method='post'):
+        self.client.force_login(self.user)
+        create_path = create_path if create_path else reverse('category-create')
+        data = {'title': self.category.title}
+        should_be_title = f'{self.category.title}(1)'
+        self.client.post(create_path, data)
+        category = Category.objects.order_by('-created_at').first()
+        self.assertNotEqual(category.title, data['title'])
+        self.assertEqual(category.title, should_be_title)
+        update_path = update_path if update_path else reverse('category-update', kwargs={'slug': category.slug})
+        getattr(self.client, update_method)(update_path, data)
+        category.refresh_from_db()
+        self.assertEqual(category.title, should_be_title)
+        self.client.logout()
+
+
 class CategoryTasksTests(CustomTestCase):
     def setUp(self):
         self.category = Category.objects.create(
