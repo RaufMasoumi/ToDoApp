@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.utils.text import slugify
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
 # Create your models here.
 
 
@@ -23,6 +24,14 @@ class CustomUser(AbstractUser):
         if not self.slug:
             self.slug = slugify(self.username)
         return super().save(*args, **kwargs)
+
+
+@receiver(post_save, sender=CustomUser)
+def create_token_for_user(instance, created, **kwargs):
+    if created:
+        Token.objects.create(
+            user=instance
+        )
 
 
 from tasklists.models import TaskList

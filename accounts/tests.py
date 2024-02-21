@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 from tasks.tests import CustomTestCase, SHOULD_NOT_CONTAIN_TEXT
 from .models import CustomUser
 # Create your tests here.
@@ -31,6 +32,10 @@ class CustomUserTests(CustomTestCase):
         self.assertEqual(user, self.user)
         self.assertEqual(user.username, self.user.username)
 
+    def test_create_user_token_signal(self):
+        self.assertTrue(Token.objects.filter(user=self.user).exists())
+        self.assertIsInstance(self.user.auth_token, Token)
+
     def test_user_slug_auto_creation(self):
         self.assertEqual(self.user.slug, 'testuser')
 
@@ -53,3 +58,4 @@ class CustomUserTests(CustomTestCase):
         self.assertEqual(response_without_kw.status_code, status.HTTP_302_FOUND)
         self.assertRedirects(response_without_kw, reverse('user-detail', kwargs={'slug': self.user.slug}))
         self.client.logout()
+
