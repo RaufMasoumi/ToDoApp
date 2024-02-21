@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, SimpleTestCase
 from django.urls import reverse_lazy, reverse
 from rest_framework import status
 from tasks.test_mixins import GenericViewsTestCase
@@ -6,6 +6,7 @@ from tasks.tests import CustomTestCase
 from tasks.mixins import ViewSOFSupportingTestsMixin, TestUserSetUpMixin
 from tasks.models import Task
 from .models import Category
+from .filters import CATEGORY_FILTERSETS_LIST, CategoryFilterSet
 
 
 class CategoryTests(GenericViewsTestCase):
@@ -190,3 +191,8 @@ class CategoryTasksTests(CustomTestCase):
         self.assertEqual(self.category.tasks.count(), 0)
         self.assertTrue(Task.objects.filter(pk=self.task.pk))
         self.client.logout()
+
+
+class CategoryFilterSetTests(SimpleTestCase):
+    def test_django_filters_middleware_supports_category_filterset(self):
+        self.assertIn(CategoryFilterSet, CATEGORY_FILTERSETS_LIST)
