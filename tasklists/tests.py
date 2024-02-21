@@ -126,8 +126,6 @@ class TaskListTests(CustomTestCase):
 
     def test_tasklist_update_view(self):
         path = reverse('tasklist-update', kwargs={'slug': self.tasklist.slug})
-        # absolute update url test
-        self.assertEqual(self.tasklist.get_absolute_update_url(), path)
         # bad user test
         self.login_required_and_user_itself_or_somecode_test(path)
         # correct user test
@@ -154,8 +152,6 @@ class TaskListTests(CustomTestCase):
 
     def test_tasklist_delete_view(self):
         path = reverse('tasklist-delete', kwargs={'slug': self.tasklist.slug})
-        # absolute delete url test
-        self.assertEqual(self.tasklist.get_absolute_delete_url(), path)
         # bad user test
         self.login_required_and_user_itself_or_somecode_test(path)
         # correct user test
@@ -243,7 +239,7 @@ class TaskListValidationTests(TestUserSetUpMixin, TestCase):
         tasklist = TaskList.objects.order_by('-created_at').first()
         self.assertNotEqual(tasklist.title, data['title'])
         self.assertEqual(tasklist.title, should_be_title)
-        update_path = update_path if update_path else tasklist.get_absolute_update_url()
+        update_path = update_path if update_path else reverse('tasklist-update', kwargs={'slug': tasklist.slug})
         getattr(self.client, update_method)(update_path, data)
         tasklist.refresh_from_db()
         self.assertEqual(tasklist.title, should_be_title)
@@ -251,7 +247,7 @@ class TaskListValidationTests(TestUserSetUpMixin, TestCase):
 
     def test_tasklist_tasks_validation(self):
         self.client.force_login(self.user)
-        path = self.tasklist.get_absolute_update_url()
+        path = reverse('tasklist-update', kwargs={'slug': self.tasklist.slug})
         data = {
             'title': self.tasklist.title,
             'tasks': [self.task.pk, self.bad_user_task.pk]
