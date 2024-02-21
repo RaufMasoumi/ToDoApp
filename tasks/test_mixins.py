@@ -161,8 +161,6 @@ class GenericViewsTestCase(ViewBadUserTestsMixin, CRUDFunctionalityTestCase):
         self, view_test_func, path: str, content: list, template_name: str, data: dict, obj, not_contain_content=(SHOULD_NOT_CONTAIN_TEXT, ),
         bad_user_status_code=status.HTTP_404_NOT_FOUND, success_url=None,  **kwargs,
     ):
-        # # absolute update url test
-        # self.assertEqual(obj.get_absolute_update_url(), path)
         # bad user test
         self.login_required_and_user_itself_or_somecode_test(path, status_code=bad_user_status_code)
         # correct user test
@@ -180,8 +178,6 @@ class GenericViewsTestCase(ViewBadUserTestsMixin, CRUDFunctionalityTestCase):
         self, view_test_func, path: str, content: list, template_name: str, obj,  success_url: str,
         not_contain_content=(SHOULD_NOT_CONTAIN_TEXT, ), bad_user_status_code=status.HTTP_404_NOT_FOUND, method='post', **kwargs
     ):
-        # absolute delete url test
-        # self.assertEqual(obj.get_absolute_delete_url(), path)
         # bad user test
         self.login_required_and_user_itself_or_somecode_test(path, status_code=bad_user_status_code)
         # correct user test

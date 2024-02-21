@@ -51,12 +51,6 @@ class Task(models.Model):
     def get_absolute_url(self):
         return reverse('task-detail', kwargs={'pk': self.pk})
 
-    def get_absolute_update_url(self):
-        return reverse('task-update', kwargs={'pk': self.pk})
-
-    def get_absolute_delete_url(self):
-        return reverse('task-delete', kwargs={'pk': self.pk})
-
     def get_absolute_api_url(self):
         return reverse('api-task-detail', kwargs={'pk': self.pk})
 
@@ -101,14 +95,12 @@ def add_and_remove_task_of_default_tasklist(instance, created, **kwargs):
 
 
 def add_task_to_tasklist(tasklist, task):
-    if task not in tasklist.tasks.all():
-        tasklist.tasks.add(task)
-        tasklist.save()
+    tasklist.tasks.add(task)
+    tasklist.save()
     return tasklist
 
 
 def remove_task_from_tasklist(tasklist, task):
-    if task in tasklist.tasks.all():
-        tasklist.tasks.remove(task)
-        tasklist.save()
+    tasklist.tasks.remove(task)
+    tasklist.save()
     return tasklist

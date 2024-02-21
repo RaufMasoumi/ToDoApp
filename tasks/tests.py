@@ -65,8 +65,6 @@ class TaskTests(CustomTestCase):
 
     def test_task_update_view(self):
         path = reverse('task-update', kwargs={'pk': self.task.pk})
-        # absolute update url test
-        self.assertEqual(self.task.get_absolute_update_url(), path)
         # bad user test
         self.login_required_and_user_itself_or_somecode_test(path)
         # correct user test
@@ -91,8 +89,6 @@ class TaskTests(CustomTestCase):
 
     def test_task_delete_view(self):
         path = reverse('task-delete', kwargs={'pk': self.task.pk})
-        # absolute delete url test
-        self.assertEqual(self.task.get_absolute_delete_url(), path)
         # bad user test
         self.login_required_and_user_itself_or_somecode_test(path)
         # correct user test
@@ -121,7 +117,7 @@ class TaskValidationTests(TestUserSetUpMixin, TestCase):
 
     def test_task_status_validation(self, update_path=None, update_method='post'):
         self.client.force_login(self.user)
-        update_path = update_path if update_path else self.task.get_absolute_update_url()
+        update_path = update_path if update_path else reverse('task-update', kwargs={'pk': self.task.pk})
         data = {'title': self.task.title, 'is_important': True, 'is_not_important': True}
         getattr(self.client, update_method)(update_path, data)
         self.task.refresh_from_db()
