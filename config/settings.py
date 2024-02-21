@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Added
+    'django.contrib.sites',
 
     # Third-party
     'rest_framework',
@@ -153,6 +155,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Authentication
 AUTH_USER_MODEL = 'accounts.CustomUser'
+SITE_ID = 1
 
 # Rest Framework
 REST_FRAMEWORK = {
