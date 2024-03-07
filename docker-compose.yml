@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8000:8000"
+    command: gunicorn config.wsgi -b 0.0.0.0:8000
+    volumes:
+      - .:/todoapp
+    environment:
+      - DJANGO_SECRET_KEY=django-insecure-3w!l@w*2kd%%fb=9#6ao+utz)afd$g@bm!vsf#hre*^i#pzt!j
+      - DJANGO_DEBUG=true
+      - DATABASE_URL=postgresql://raufmasoumi:09011385@postgres:5432/ToDoApp
+      - DJANGO_SECURE_SSL_REDIRECT=false
+      - DJANGO_SECURE_HSTS_PRELOAD=false
+      - DJANGO_SECURE_HSTS_SECONDS=0
+      - DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS=false
+      - DJANGO_CSRF_COOKIE_SECURE=false
+      - DJANGO_SESSION_COOKIE_SECURE=false
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:latest
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=ToDoApp
+      - POSTGRES_USER=raufmasoumi
+      - POSTGRES_PASSWORD=09011385
+
+volumes:
+  postgres_data:
