@@ -186,9 +186,9 @@ REST_FRAMEWORK = {
 CORS_ALLOWED_ORIGINS = (
     'http://localhost:3000',
     'http://localhost:8000',
-    'https://todoapp-ifsacz5b.b4a.run/'
+    'https://todoapp-ifsacz5b.b4a.run'
 )
-CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://todoapp-ifsacz5b.b4a.run/']
+CSRF_TRUSTED_ORIGINS = ['http://localhost:3000', 'https://todoapp-ifsacz5b.b4a.run']
 
 # production security
 SECURE_SSL_REDIRECT = env.bool('DJANGO_SECURE_SSL_REDIRECT', default=True)
