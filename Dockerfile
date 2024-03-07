@@ -6,4 +6,5 @@ COPY Pipfile Pipfile.lock ./
 RUN python -m pip install pipenv && pipenv install --system
 COPY . .
 EXPOSE 8000
+CMD ["gunicorn", "config.wsgi", "-b", "0.0.0.0:8000"]
 
