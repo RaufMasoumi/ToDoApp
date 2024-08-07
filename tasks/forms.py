@@ -10,7 +10,7 @@ class TaskModelForm(ModelForm):
     class Meta:
         model = Task
         fields = [
-            'title', 'due_date', 'is_daily', 'is_important', 'is_not_important', 'is_timely_important', 'is_done'
+            'title', 'due_date', 'categories', 'is_daily', 'is_important', 'is_not_important', 'is_timely_important', 'is_done'
         ]
 
     def clean(self):

@@ -1,16 +1,18 @@
 from rest_framework import serializers
 from tasklists.nested_serializers import TaskListNestedSerializer
 from tasklists.models import TaskList
+from categories.nested_serializers import CategoryNestedSerializer
 from .models import Task
 
 
 class TaskDetailSerializer(serializers.HyperlinkedModelSerializer):
     tasklists = TaskListNestedSerializer(many=True, required=False)
+    categories = CategoryNestedSerializer(many=True, required=False)
 
     class Meta:
         model = Task
         fields = ['id', 'url', 'user', 'title', 'due_date', 'is_daily', 'is_done', 'is_important', 'is_not_important',
-                  'is_timely_important', 'tasklists', 'created_at', 'updated_at', 'done_at']
+                  'is_timely_important', 'tasklists', 'categories', 'created_at', 'updated_at', 'done_at']
 
         extra_kwargs = {
             'url': {'view_name': 'api-task-detail'},
