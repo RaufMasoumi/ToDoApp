@@ -4,8 +4,11 @@
     <h1>{{ category.title }}</h1>
     <h3>Tasks:</h3>
     {% for task in filter.qs %}
+        {% include 'snippets/task_detail.html' %}
         <p>
-            <h4><a href="{{ task.get_absolute_url }}">{{ task.title }}</a></h4> <a style="color: red" href="{% url 'category-task-delete' category.slug task.pk %}">Remove from the category</a>
+            <h5><a href="{% url 'category-task-update' category.slug task.pk %}">Update Task</a></h5>
+            <h5><a href="{% url 'category-task-delete' category.slug task.pk %}">Remove Task from category</a></h5>
+            <h5><a href="{% url 'task-delete' task.pk %}?tasklist={{ category.slug }}">Delete Task</a></h5>
         </p>
         <hr>
     {% endfor %}

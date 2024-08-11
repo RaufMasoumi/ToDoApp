@@ -1,0 +1,23 @@
+<p>
+    <h3><a href="{{ task.get_absolute_url }}">{{ task.title }}</a></h3>
+    {% if task.due_date %}
+        <h4>due date: {{ task.due_date }}</h4>
+    {% endif %}
+    {% if task.is_daily %}
+        <h4>Daily</h4>
+    {% endif %}
+    {% if task.is_important %}
+        <h4 style="color: red">Important</h4>
+    {% endif %}
+    {% if task.is_not_important %}
+        <h4 style="color: blueviolet">Not important</h4>
+    {% endif %}
+    {% if task.is_done %}
+        <h4>Done!</h4>
+        <h5>at {{ task.done_at }}</h5>
+    {% else %}
+        <h4>Not Done!</h4>
+    {% endif %}
+    <h4>Since: {{ task.created_at }}</h4>
+    <h4>Updated at: {{ task.updated_at }}</h4>
+</p>
