@@ -55,11 +55,7 @@ class Task(models.Model):
         return reverse('api-task-detail', kwargs={'pk': self.pk})
 
     def get_short_title(self):
-        if len(self.title) >= 30:
-            short_title = self.title[:30] + ' ...'
-        else:
-            short_title = self.title
-        return short_title
+        return get_short_title(self.title)
 
     def save(
             self, force_insert=False, force_update=False, using=None, update_fields=None
@@ -77,6 +73,19 @@ class Task(models.Model):
         return super().save(force_insert, force_update, using, update_fields)
 
 
+class TaskStep(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    task = models.ForeignKey(Task, related_name='steps', on_delete=models.CASCADE)
+    title = models.CharField(max_length=300)
+    is_done = models.BooleanField(default=False)
+
+    def get_short_title(self):
+        return get_short_title(self.title)
+
+    def __str__(self):
+        return f'{self.get_short_title()}(step of {self.task.get_short_title()} task)'
+
+
 @receiver(post_save, sender=Task)
 def add_and_remove_task_of_default_tasklist(instance, created, **kwargs):
     task = instance
@@ -92,6 +101,14 @@ def add_and_remove_task_of_default_tasklist(instance, created, **kwargs):
                     add_task_to_tasklist(default_tasklist, task)
                 else:
                     remove_task_from_tasklist(default_tasklist, task)
+
+
+def get_short_title(title):
+    if len(title) >= 30:
+        short_title = title[:30] + ' ...'
+    else:
+        short_title = title
+    return short_title
 
 
 def add_task_to_tasklist(tasklist, task):

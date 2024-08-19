@@ -21,6 +21,24 @@
     {% else %}
         <h4>Not Done!</h4>
     {% endif %}
+    {% if task.steps.count %}
+        <h4>Steps:</h4>
+        <ul>
+            {% for step in task.steps.all %}
+                <li>
+                    <h4>{{ step.title }}</h4>
+                    {% if step.is_done %}
+                        <h5 style="color: forestgreen">Done!</h5>
+                    {% else %}
+                        <h5 style="color: orangered">Not Done!</h5>
+                    {% endif %}
+                    <h6><a href="{% url 'taskstep-update' step.pk %}">Update</a> |
+                        <a href="{% url 'taskstep-delete' step.pk %}">Delete</a></h6>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <h5><a href="{% url 'taskstep-create' %}?task={{ task.pk }}">Add Step</a></h5>
     <h4>Since: {{ task.created_at }}</h4>
     <h4>Updated at: {{ task.updated_at }}</h4>
     {% if task.tasklists.count %}

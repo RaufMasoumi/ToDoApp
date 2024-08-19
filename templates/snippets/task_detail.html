@@ -18,6 +18,24 @@
     {% else %}
         <h4>Not Done!</h4>
     {% endif %}
+    {% if task.steps.count %}
+    <h4>
+        has {{ task.steps.count }} Step(s)
+    </h4>
+    {% endif %}
+    <h4>
+        Is in:
+        {% for tasklist in task.tasklists.all %}
+            <a href="{{ tasklist.get_absolute_url }}">{{ tasklist.title }}</a>
+            {% if task.tasklists.last != tasklist %},
+            {% endif %}
+        {% endfor %}
+    </h4>
+    <h4>
+        {% for category in task.categories.all %}
+            <a href="{{ category.get_absolute_url }}">#{{ category.title }}</a>
+        {% endfor %}
+    </h4>
     <h4>Since: {{ task.created_at }}</h4>
     <h4>Updated at: {{ task.updated_at }}</h4>
 </p>

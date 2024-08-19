@@ -6,31 +6,10 @@
     {% include 'snippets/search.html' %}
     <hr>
     {% for task in filter.qs %}
-        <p>
-            <h3><a href="{{ task.get_absolute_url }}">{{ task.title }}</a></h3>
-            <h4>due date: {{ task.due_date }}</h4>
-            {% if task.is_important %}
-                <h4 style="color: red">Important</h4>
-            {% endif %}
-            {% if task.is_not_important %}
-                <h4 style="color: blueviolet">Not important</h4>
-            {% endif %}
-            {% if task.is_done %}
-                <h4>Done!</h4>
-                <h5>at {{ task.done_at }}</h5>
-            {% else %}
-                <h4>Not Done!</h4>
-            {% endif %}
-            <h4>Since: {{ task.created_at }}</h4>
-            <h4>Updated at: {{ task.updated_at }}</h4>
-            <h4>TaskLists:</h4>
-            {% for tasklist in task.tasklists.all %}
-                <h5><a href="{{ tasklist.get_absolute_url }}">{{ tasklist.title }}</a></h5>
-            {% endfor %}
-        </p>
-        <p>
-            <a href="{% url 'task-update' task.pk %}">Update task</a>
-            <a href="{% url 'task-delete' task.pk %}">Delete task</a>
+        {% include 'snippets/task_detail.html' %}
+         <p>
+            <h5><a href="{% url 'task-update' task.pk %}">Update Task</a></h5>
+            <h5><a href="{% url 'task-delete' task.pk %}">Delete Task</a></h5>
         </p>
         <hr>
     {% endfor %}

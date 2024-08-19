@@ -1,0 +1,11 @@
+{% extends '_base.html' %}
+
+{% block content %}
+    <h1>Delete Step{{ taskstep.pk }} of "{{ taskstep.task.get_short_title }}" Task</h1>
+    <form method="post">
+        <h2>Are you sure you want to DELETE it?</h2>
+        {{ form.as_p }}
+        {% csrf_token %}
+        <button class="btn btn-success" type="submit">Delete</button>
+    </form>
+{% endblock %}
