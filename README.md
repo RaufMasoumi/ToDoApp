@@ -30,6 +30,9 @@ ToDoApp is a comprehensive planning application that helps you organize your tas
 
 The project is based on Django and Django REST Framework, and its main inspiration comes from the [Microsoft ToDo](https://to-do.office.com/) application.
 
+ToDoApp is deployed on [Back4app](https://www.back4app.com/) platform and you can test it [here](https://todoapp-ifsacz5b.b4a.run/).
+
+
 ---
 
 ## 🚀 Features
