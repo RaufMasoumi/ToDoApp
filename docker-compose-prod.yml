@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    command: gunicorn config.wsgi -b 0.0.0.0:8000
+    volumes:
+      - .:/todoapp
+    environment:
+      - DJANGO_SECRET_KEY=django-insecure-3w!l@w*2kd%%fb=9#6ao+utz)afd$g@bm!vsf#hre*^i#pzt!j
+      - DATABASE_URL=postgresql://raufmasoumi:09011385@postgres:5432/ToDoApp
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:latest
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=ToDoApp
+      - POSTGRES_USER=raufmasoumi
+      - POSTGRES_PASSWORD=09011385
+
+volumes:
+  postgres_data:

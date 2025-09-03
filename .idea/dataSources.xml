@@ -2,7 +2,7 @@
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
     <data-source source="LOCAL" name="db" uuid="ae853bfa-3e52-4825-9ed0-b24462b99149">
-      <driver-ref>sqlite.xerial</driver-ref>
+      <driver-ref>fa537801-ec3f-4e5b-9e14-9c97d08a87e1</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:E:\rauf programming\ToDoApp\db.sqlite3</jdbc-url>
